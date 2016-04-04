@@ -3,7 +3,14 @@ var LifeGrid = (function() {
 	// private properties
 	var attributes, //{Object} holds all the setting attributes of grid
 		checkArgumentsForError, //{Function} check wheather provided arguments are alright or not
-		apiMethods; // {Object} holds all the API methods mainly getter setter methods for all attributes
+		apiMethods, // {Object} holds all the API methods mainly getter setter methods for all attributes
+		startRenderingTheGrid,
+		dataForGrid,
+		gridId,
+		gridContainer,
+		prepareTableHeader,
+		plotDataOnTable;
+
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
 	this.render; // Render the grid inside container
@@ -11,23 +18,23 @@ var LifeGrid = (function() {
 
 	attributes = {
 		caption: {
-			captionText: "",// The text of the caption
-			captionColor: "", // Color of the caption
-			captionFilleColor: "", // Background color of caption holding DOM
+			captionText: [],// The text of the caption
+			captionColor: [], // Color of the caption
+			captionFillColor: [], // Background color of caption holding DOM
 			captionFont: "", // Font of caption
 			captionFontSize: "", // Font size of caption
 			captionFontStyle: "", // Font style of caption Bold/Italics/Underline
-			captionHoverColor: "", // Color of the caption when mouse hoover occures
-			captionHoverFillColor: "", // Color of the caption background when mouse hoover occurs
+			captionHoverColor: [], // Color of the caption when mouse hoover occures
+			captionHoverFillColor: [], // Color of the caption background when mouse hoover occurs
 
-			subCaptionText: "",
-			subCaptionColor: "",
-			subCaptionFilleColor: "",
+			subCaptionText: [],
+			subCaptionColor: [],
+			subCaptionFillColor: [],
 			subCaptionFont: "",
 			subCaptionFontSize: "",
-			subCaptionFontStyle: ""
-			subCaptionHoverColor: "",
-			subClaptionHoverFillColor: "",
+			subCaptionFontStyle: "",
+			subCaptionHoverColor: [],
+			subClaptionHoverFillColor: []
 		},
 
 		heading: {
@@ -36,8 +43,72 @@ var LifeGrid = (function() {
 			headingFont: "", // heading font
 			headingFontSize: "", // heading font size
 			headingFontStyle: "" // heading font style Bold/Italics/Underline
+		},
+
+		pagination: {
+			dataPerPage: 20
 		}
+
 	}
+
+	/**
+	* @description - This function prepare rows for data
+	* @param data {Array} - Array of objects, optional, provided only for multiseries
+	* @return {Boolean} - The table header html
+	*/
+	plotDataOnTable = (function(startIndex, endIndex, data) {
+		var index,
+			rawHTML;
+		rawHTML = "";	
+		if(typeof data == "undefined") {
+			for(index=startIndex; index<=endIndex; index++) {
+				rawHTML += "<"
+			}
+		} else {
+
+		}
+	});
+
+	/**
+	* @description - This function prepare the table header
+	* @param data {Array} - Array of objects, optional, provided only for multiseries
+	* @return {Boolean} - The table header html
+	*/
+	prepareTableHeader = (function(data) {
+		var index, 
+			headerHTML,
+			dataHeaders;
+		headerHTML = "<tr>";
+		dataHeaders = Object.keys(data);console.log(dataHeaders);
+		for(var index in dataHeaders) {
+			if(dataHeaders[index].toLowerCase() == "label") {
+				headerHTML += "<th>" + ((typeof dataHeaders[index].label != "undefined")?dataHeaders[index].label:"    ") + "</th>";
+			}
+		}
+		
+		headerHTML += "</tr>";
+		return headerHTML;	
+	});
+
+	startRenderingTheGrid = (function() {
+		var gridHTML,
+			dataKeys,
+			dataKeyIndex;
+
+		if(Array.isArray(dataForGrid)) {// For single seriese
+			gridHTML = "<table>";
+			gridHTML += prepareTableHeader(dataForGrid[0]);	console.log(gridHTML);
+			gridHTML += plotDataOnTable(0, (attributes.pagination.dataPerPage-1));
+
+		} else { // for multiseriese
+			dataKeys = Object.keys(dataForGrid);
+			for(dataKeyIndex in dataKeys) {
+
+			}
+		}
+
+		
+	});
 
 	/**
 	* @description - Check all the provided arguments to initialize the grid are alright or not
@@ -58,6 +129,9 @@ var LifeGrid = (function() {
 	*/
 	this.initialize = (function(values) {
 		if(checkArgumentsForError(values)) {
+			gridId = values[0]; 
+			gridContainer = values[1]; 
+			dataForGrid = values[3];
 			return true;
 		}
 		return false;
@@ -67,7 +141,7 @@ var LifeGrid = (function() {
 	* @description - Render the grid inside container
 	*/
 	this.render = (function() {
-
+		startRenderingTheGrid();
 	});
 }),
 LG = LifeGrid;
