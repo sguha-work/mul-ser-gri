@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript" src="mul-ser-gri.js"></script>
+</head>
+<body>
+	<div id="div_grid"></div>
+	<script type="text/javascript">
+		var data,
+		l;
+		data = [
+			{
+				label:"abcd1", 
+				value: "1234"
+			},
+			{
+				label:"abcd2", 
+				value: "1235"
+			},
+			{
+				label:"abcd3", 
+				value: "1236"
+			},
+			{
+				label:"abcd4", 
+				value: "1237"
+			},
+			{
+				label:"abcd5", 
+				value: "1238"
+			},
+		];
+		l = new LifeGrid("mygrid", "div_grid", {captionText:"table 1"}, data);
+		l.render();
+	</script>
+</body>
+</html>
