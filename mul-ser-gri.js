@@ -9,7 +9,8 @@ var LifeGrid = (function() {
 		gridId,
 		gridContainer,
 		prepareTableHeader,
-		prepareRowOfTable;
+		prepareRowOfTable,
+		prepareDOM;
 
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
@@ -87,16 +88,34 @@ var LifeGrid = (function() {
 		return headerHTML;	
 	});
 
+	/**
+	* @description - This function prepare the dom element from html string and attach it with page hiddenly
+	* @param gridHTML {String} - The html string
+	*/
+	prepareDOM = (function(gridHTML) {
+		if(document.getElementById(gridContainer)) {
+			document.getElementById(gridContainer).innerHTML = gridHTML;
+		} else if(document.getElementsByClassName(gridContainer)) {
+			document.getElementsByClassName(gridContainer)[0].innerHTML = gridHTML;
+		}
+	});
+
+	/**
+	* @description - From this function the rendering begins
+	*/
 	startRenderingTheGrid = (function() {
 		var gridHTML,
 			dataKeys,
 			dataKeyIndex;
 
 		if(Array.isArray(dataForGrid)) {// For single seriese
-			gridHTML = "<table>";
+			gridHTML = "<table style='display:none'>";
 			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
 			gridHTML += prepareRowOfTable(dataForGrid[0].data.value.length, attributes.pagination.dataPerPage);
-			gridHTML += "</table>";console.log(gridHTML);
+			gridHTML += "</table>";
+			prepareDOM(gridHTML);
+			//startAttachingAttribute();
+			console.log(gridHTML);
 
 		} else { // for multiseriese
 			dataKeys = Object.keys(dataForGrid);
