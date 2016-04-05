@@ -18,7 +18,6 @@ var LifeGrid = (function() {
 
 	attributes = {
 		caption: {
-			captionText: [],// The text of the caption
 			captionColor: [], // Color of the caption
 			captionFillColor: [], // Background color of caption holding DOM
 			captionFont: "", // Font of caption
@@ -27,7 +26,6 @@ var LifeGrid = (function() {
 			captionHoverColor: [], // Color of the caption when mouse hoover occures
 			captionHoverFillColor: [], // Color of the caption background when mouse hoover occurs
 
-			subCaptionText: [],
 			subCaptionColor: [],
 			subCaptionFillColor: [],
 			subCaptionFont: "",
@@ -74,16 +72,12 @@ var LifeGrid = (function() {
 	* @param data {Array} - Array of objects, optional, provided only for multiseries
 	* @return {Boolean} - The table header html
 	*/
-	prepareTableHeader = (function(data) {
+	prepareTableHeader = (function(headers) {
 		var index, 
-			headerHTML,
-			dataHeaders;
+			headerHTML;
 		headerHTML = "<tr>";
-		dataHeaders = Object.keys(data);console.log(dataHeaders);
-		for(var index in dataHeaders) {
-			if(dataHeaders[index].toLowerCase() == "label") {
-				headerHTML += "<th>" + ((typeof dataHeaders[index].label != "undefined")?dataHeaders[index].label:"    ") + "</th>";
-			}
+		for(var index in headers) {
+			headerHTML += "<th>" + headers[index] + "</th>";
 		}
 		
 		headerHTML += "</tr>";
@@ -97,7 +91,7 @@ var LifeGrid = (function() {
 
 		if(Array.isArray(dataForGrid)) {// For single seriese
 			gridHTML = "<table>";
-			gridHTML += prepareTableHeader(dataForGrid[0]);	console.log(gridHTML);
+			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	console.log(gridHTML);
 			gridHTML += plotDataOnTable(0, (attributes.pagination.dataPerPage-1));
 
 		} else { // for multiseriese

@@ -8,71 +8,26 @@
 <body>
 	<div id="div_grid"></div>
 	<script type="text/javascript">
-		var data,
+		var dataSet,
 		l;
-		data = [
+		dataSet = [
 			{
-				label:"header1", 
-				value: "1234",
-				label:"header2", 
-				value: "1235",
-				label:"header3", 
-				value: "1236",
-				label:"header4", 
-				value: "1237",
-				label:"header5", 
-				value: "1238"
-			},
-			{
-				label:"header1", 
-				value: "1234",
-				label:"header2", 
-				value: "1235",
-				label:"header3", 
-				value: "1236",
-				label:"header4", 
-				value: "1237",
-				label:"header5", 
-				value: "1238"	
-			},
-			{
-				label:"header1", 
-				value: "1234",
-				label:"header2", 
-				value: "1235",
-				label:"header3", 
-				value: "1236",
-				label:"header4", 
-				value: "1237",
-				label:"header5", 
-				value: "1238"
-			},
-			{
-				label:"header1", 
-				value: "1234",
-				label:"header2", 
-				value: "1235",
-				label:"header3", 
-				value: "1236",
-				label:"header4", 
-				value: "1237",
-				label:"header5", 
-				value: "1238"
-			},
-			{
-				label:"header1", 
-				value: "1234",
-				label:"header2", 
-				value: "1235",
-				label:"header3", 
-				value: "1236",
-				label:"header4", 
-				value: "1237",
-				label:"header5", 
-				value: "1238"
+				caption: "Table 1",
+				subCaption: "This table holds sample data",
+				data: {
+					label: ["header1", "header2", "header3", "header4", "header5"], 
+					value: [
+						["1234", "1235", "1236", "1237", "1238"],
+						["1234", "1235", "1236", "1237", "1238"],
+						["1234", "1235", "1236", "1237", "1238"],
+						["1234", "1235", "1236", "1237", "1238"],
+						["1234", "1235", "1236", "1237", "1238"]
+					]
+				}
 			}
+			
 		];
-		l = new LifeGrid("mygrid", "div_grid", {captionText:"table 1"}, data);
+		l = new LifeGrid("mygrid", "div_grid", {}, dataSet);
 		l.render();
 	</script>
 </body>
