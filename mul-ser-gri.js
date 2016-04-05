@@ -9,7 +9,7 @@ var LifeGrid = (function() {
 		gridId,
 		gridContainer,
 		prepareTableHeader,
-		plotDataOnTable;
+		prepareRowOfTable;
 
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
@@ -51,25 +51,28 @@ var LifeGrid = (function() {
 
 	/**
 	* @description - This function prepare rows for data
-	* @param data {Array} - Array of objects, optional, provided only for multiseries
-	* @return {Boolean} - The table header html
+	* @param numberOfRows {Number} - Number of rows
+	* @param numberOfColoumns {Number} - Number of columns
+	* @return {Boolean} - The table row html
 	*/
-	plotDataOnTable = (function(startIndex, endIndex, data) {
-		var index,
-			rawHTML;
-		rawHTML = "";	
-		if(typeof data == "undefined") {
-			for(index=startIndex; index<=endIndex; index++) {
-				rawHTML += "<"
+	prepareRowOfTable = (function(numberOfRows, numberOfColumns) {
+		var rowIndex,
+			rowHTML,
+			columnIndex;
+		rowHTML = "";	
+		for(rowIndex=0; rowIndex<numberOfRows; rowIndex++) {
+			rowHTML += "<tr>";
+			for(columnIndex=0; columnIndex<numberOfColumns; columnIndex++) {
+				rowHTML += "<td></td>";
 			}
-		} else {
-
+			rowHTML += "</tr>";
 		}
+		return rowHTML; 
 	});
 
 	/**
 	* @description - This function prepare the table header
-	* @param data {Array} - Array of objects, optional, provided only for multiseries
+	* @param headers {Array} - Array of Strings
 	* @return {Boolean} - The table header html
 	*/
 	prepareTableHeader = (function(headers) {
@@ -91,8 +94,9 @@ var LifeGrid = (function() {
 
 		if(Array.isArray(dataForGrid)) {// For single seriese
 			gridHTML = "<table>";
-			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	console.log(gridHTML);
-			gridHTML += plotDataOnTable(0, (attributes.pagination.dataPerPage-1));
+			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
+			gridHTML += prepareRowOfTable(dataForGrid[0].data.value.length, attributes.pagination.dataPerPage);
+			gridHTML += "</table>";console.log(gridHTML);
 
 		} else { // for multiseriese
 			dataKeys = Object.keys(dataForGrid);
