@@ -17,7 +17,8 @@ var LifeGrid = (function() {
 		prepareTableFooter,
 		userGivenAttributes,
 		common,
-		addResourceToPage;
+		addResourceToPage,
+		startInjectingData;
 
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
@@ -118,14 +119,15 @@ var LifeGrid = (function() {
 		var rowIndex,
 			rowHTML,
 			columnIndex;
-		rowHTML = "";	
+		rowHTML = '<div class="db-table-data"><table role="data-table"><tbody><colgroup><col style="width:20%"><col style="width:30%"><col style="width:30%"><col style="width:20%"></colgroup>';	
 		for(rowIndex=0; rowIndex<numberOfRows; rowIndex++) {
-			rowHTML += "<tr>";
+			rowHTML += '<tr role="row">';
 			for(columnIndex=0; columnIndex<numberOfColumns; columnIndex++) {
-				rowHTML += "<td></td>";
+				rowHTML += '<td role="cell"><div class="customer-img"><img src="images/rahul.jpg" width="" height="" alt="Rahul Kumar"></div><div class="cusotmer-name">';
 			}
-			rowHTML += "</tr>";
+			rowHTML += '</tr>';
 		}
+		rowHTML += '</tbody></table></div>';
 		return rowHTML; 
 	});
 
@@ -137,12 +139,12 @@ var LifeGrid = (function() {
 	prepareTableHeader = (function(headers) {
 		var index, 
 			headerHTML;
-		headerHTML = "<tr>";
+		headerHTML = '<div class="db-table-header"><table role="table-header"><tbody><colgroup><col style="width:20%"><col style="width:30%"><col style="width:30%"><col style="width:20%"></colgroup><tr>';
 		for(var index in headers) {
-			headerHTML += "<th>" + headers[index] + "</th>";
+			headerHTML += '<td><a href="#">' + headers[index] + ' <span class="db-icon db-icon-up"></span></a></td>';
 		}
 		
-		headerHTML += "</tr>";
+		headerHTML += "</tr></tbody></table></div>";
 		return headerHTML;	
 	});
 
@@ -151,7 +153,9 @@ var LifeGrid = (function() {
 	* @return {String} - Caption HTML
 	*/
 	prepareTableCaption = (function() {
-		return "";
+		var captionHTML;
+		captionHTML = '<div class="db-table-wrapper"><div class="db-table-caption"><h1 class="table-caption">FusionCharts Data Table</h1><p class="small">Drag a column header and drop it here to group by that column</p></div><div class="db-table-header">';
+		return captionHTML;
 	});
 
 	/**
@@ -159,7 +163,9 @@ var LifeGrid = (function() {
 	* @return {String} - Caption HTML
 	*/
 	prepareTableFooter = (function() {
-		return "";
+		var footerHTML;
+		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination"><li><a href="#" class="page-link">1</a></li><li><a href="#" class="page-link">2</a></li><li><a href="#" class="page-link">3</a></li><li><a href="#" class="page-link">4</a></li><li><span class="page-link-selected">5</span></li><li><a href="#" class="page-link" title="More pages">...</a></li></ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="text" class="search"><input type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info">91 - 91 of 91 items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
+		return footerHTML;
 	});
 
 
@@ -193,6 +199,13 @@ var LifeGrid = (function() {
 	});
 
 	/**
+	* @description - This method start injecting the data inside the grid
+	*/
+	startInjectingData = (function() {
+
+	});
+
+	/**
 	* @description - From this function the rendering begins
 	*/
 	startRenderingTheGrid = (function() {
@@ -203,24 +216,20 @@ var LifeGrid = (function() {
 
 		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
 			gridHTML = prepareTableCaption();
-			gridHTML += "<table style='display:none'>";
 			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
 			gridHTML += prepareRowOfTable(dataForGrid[0].data.value.length, attributes.pagination.dataPerPage);
-			gridHTML += "</table>";
 			gridHTML += prepareTableFooter();
 			prepareDOM(gridHTML);
 			startAttachingAttribute();
 			startBindingEvents();
-			
+			startInjectingData();
 
 		} else { // for multiseriese
 			gridHTML = "";
 			for(dataGridIndex in dataForGrid) {
 				gridHTML += prepareTableCaption();
-				gridHTML += "<table style='display:none'>";	
 				gridHTML += prepareTableHeader(dataForGrid[dataGridIndex].data.label);	
 				gridHTML += prepareRowOfTable(dataForGrid[dataGridIndex].data.value.length, attributes.pagination.dataPerPage);
-				gridHTML += "</table>";
 				gridHTML += prepareTableFooter();
 			}
 			prepareDOM(gridHTML);
