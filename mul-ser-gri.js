@@ -10,7 +10,13 @@ var LifeGrid = (function() {
 		gridContainer,
 		prepareTableHeader,
 		prepareRowOfTable,
-		prepareDOM;
+		prepareDOM,
+		startAttachingAttribute,
+		startBindingEvents,
+		prepareTableCaption,
+		prepareTableFooter,
+		userGivenAttributes,
+		common;
 
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
@@ -18,6 +24,11 @@ var LifeGrid = (function() {
 	this.api; // {Object} holds all the api methods
 
 	attributes = {
+		style: {
+			border: "solid", // {String}, border of the table
+			borderWidth: 0, // {Number}, width of the border
+			borderColor: "" //{String}, color code of the border
+		},
 		caption: {
 			captionColor: [], // Color of the caption
 			captionFillColor: [], // Background color of caption holding DOM
@@ -49,6 +60,37 @@ var LifeGrid = (function() {
 		}
 
 	}
+
+	// common is the core object holding basic functionalities
+	common = {};
+	
+	/**
+	* @description - Merge the properties of two object
+	* @param object1 {Object} - First and parent object
+	* @param object2 {Object} - Second and child object
+	* @return {Object} - The final object injected properties of child to parent
+	*/
+	common.mergeObject = (function(object1, object2) {
+		var object1Keys,
+			globalAttributeKeyIndex,
+			childAttributeKeys,
+			childAttributeKeyIndex;
+		
+		object1Keys = Object.keys(object1);
+		for(globalAttributeKeyIndex in object1Keys) {
+			childAttributeKeys = Object.keys(object1[object1Keys[globalAttributeKeyIndex]]);
+			for(childAttributeKeyIndex in childAttributeKeys) {
+				if(typeof object2[object1Keys[globalAttributeKeyIndex]] != "undefined" && typeof object2[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]] != "undefined") {
+					if(typeof object2[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]] == typeof object1[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]]) {
+						object1[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]] = object2[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]];
+					} else {
+						// the data provided as attribute value is not valid
+					}
+				}
+			}
+		}
+		return object1;
+	});
 
 	/**
 	* @description - This function prepare rows for data
@@ -89,6 +131,23 @@ var LifeGrid = (function() {
 	});
 
 	/**
+	* @description - This function prepare the table caption
+	* @return {String} - Caption HTML
+	*/
+	prepareTableCaption = (function() {
+		return "";
+	});
+
+	/**
+	* @description - This function prepare the table footer (search option, pagination)
+	* @return {String} - Caption HTML
+	*/
+	prepareTableFooter = (function() {
+		return "";
+	});
+
+
+	/**
 	* @description - This function prepare the dom element from html string and attach it with page hiddenly
 	* @param gridHTML {String} - The html string
 	*/
@@ -101,6 +160,23 @@ var LifeGrid = (function() {
 	});
 
 	/**
+	* @description - Begins attaching attribute (both default and user given) to the grid
+	*/
+	startAttachingAttribute = (function() {
+		
+		// merging user given attributes to main attribute
+		attributes = common.mergeObject(attributes, userGivenAttributes);
+		console.log(attributes);
+	});
+
+	/**
+	* @description - Begins binding various predefined events to the grid
+	*/
+	startBindingEvents = (function() {
+
+	});
+
+	/**
 	* @description - From this function the rendering begins
 	*/
 	startRenderingTheGrid = (function() {
@@ -110,28 +186,33 @@ var LifeGrid = (function() {
 			dataGridIndex;
 
 		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
-			gridHTML = "<table style='display:none'>";
+			gridHTML = prepareTableCaption();
+			gridHTML += "<table style='display:none'>";
 			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
 			gridHTML += prepareRowOfTable(dataForGrid[0].data.value.length, attributes.pagination.dataPerPage);
 			gridHTML += "</table>";
+			gridHTML += prepareTableFooter();
 			prepareDOM(gridHTML);
-			//startAttachingAttribute();
-			console.log(gridHTML);
+			startAttachingAttribute();
+			startBindingEvents();
+			
 
 		} else { // for multiseriese
 			gridHTML = "";
 			for(dataGridIndex in dataForGrid) {
+				gridHTML += prepareTableCaption();
 				gridHTML += "<table style='display:none'>";	
 				gridHTML += prepareTableHeader(dataForGrid[dataGridIndex].data.label);	
 				gridHTML += prepareRowOfTable(dataForGrid[dataGridIndex].data.value.length, attributes.pagination.dataPerPage);
 				gridHTML += "</table>";
-			}console.log(gridHTML);
+				gridHTML += prepareTableFooter();
+			}
 			prepareDOM(gridHTML);
-
-			
+			startAttachingAttribute();
+			startBindingEvents();
 		}
 
-		
+		console.log(gridHTML);
 	});
 
 	/**
@@ -155,6 +236,7 @@ var LifeGrid = (function() {
 		if(checkArgumentsForError(values)) {
 			gridId = values[0]; 
 			gridContainer = values[1]; 
+			userGivenAttributes = values[2];
 			dataForGrid = values[3];
 			return true;
 		}
