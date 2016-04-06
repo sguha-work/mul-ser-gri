@@ -72,7 +72,7 @@ var LifeGrid = (function() {
 	    link  = document.createElement('link');
 	    link.rel  = 'stylesheet';
 	    link.type = 'text/css';
-	    link.href = 'template/css/stylesheet.css';
+	    link.href = 'life-grid/template/css/style.css';
 	    link.media = 'all';
 	    head.appendChild(link);
 	});	
