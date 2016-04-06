@@ -106,9 +106,10 @@ var LifeGrid = (function() {
 	startRenderingTheGrid = (function() {
 		var gridHTML,
 			dataKeys,
-			dataKeyIndex;
+			dataKeyIndex,
+			dataGridIndex;
 
-		if(Array.isArray(dataForGrid)) {// For single seriese
+		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
 			gridHTML = "<table style='display:none'>";
 			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
 			gridHTML += prepareRowOfTable(dataForGrid[0].data.value.length, attributes.pagination.dataPerPage);
@@ -118,10 +119,16 @@ var LifeGrid = (function() {
 			console.log(gridHTML);
 
 		} else { // for multiseriese
-			dataKeys = Object.keys(dataForGrid);
-			for(dataKeyIndex in dataKeys) {
+			gridHTML = "";
+			for(dataGridIndex in dataForGrid) {
+				gridHTML += "<table style='display:none'>";	
+				gridHTML += prepareTableHeader(dataForGrid[dataGridIndex].data.label);	
+				gridHTML += prepareRowOfTable(dataForGrid[dataGridIndex].data.value.length, attributes.pagination.dataPerPage);
+				gridHTML += "</table>";
+			}console.log(gridHTML);
+			prepareDOM(gridHTML);
 
-			}
+			
 		}
 
 		
