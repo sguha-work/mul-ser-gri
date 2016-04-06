@@ -16,7 +16,8 @@ var LifeGrid = (function() {
 		prepareTableCaption,
 		prepareTableFooter,
 		userGivenAttributes,
-		common;
+		common,
+		addResourceToPage;
 
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
@@ -60,6 +61,21 @@ var LifeGrid = (function() {
 		}
 
 	}
+
+	/**
+	* @description - This method add resource files to the page
+	*/
+	addResourceToPage = (function() {
+		var head,
+			link;
+	    head  = document.getElementsByTagName('head')[0];
+	    link  = document.createElement('link');
+	    link.rel  = 'stylesheet';
+	    link.type = 'text/css';
+	    link.href = 'template/css/stylesheet.css';
+	    link.media = 'all';
+	    head.appendChild(link);
+	});	
 
 	// common is the core object holding basic functionalities
 	common = {};
@@ -238,6 +254,7 @@ var LifeGrid = (function() {
 			gridContainer = values[1]; 
 			userGivenAttributes = values[2];
 			dataForGrid = values[3];
+			addResourceToPage();
 			return true;
 		}
 		return false;
