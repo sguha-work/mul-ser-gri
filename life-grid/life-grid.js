@@ -123,7 +123,7 @@ var LifeGrid = (function() {
 		for(rowIndex=0; rowIndex<numberOfRows; rowIndex++) {
 			rowHTML += '<tr role="row">';
 			for(columnIndex=0; columnIndex<numberOfColumns; columnIndex++) {
-				rowHTML += '<td role="cell"><div class="customer-img"><img src="images/rahul.jpg" width="" height="" alt="Rahul Kumar"></div><div class="cusotmer-name">';
+				rowHTML += '<td role="cell"><div class="cusotmer-name"></div></td>';
 			}
 			rowHTML += '</tr>';
 		}
