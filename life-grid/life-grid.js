@@ -123,7 +123,7 @@ var LifeGrid = (function() {
 		for(rowIndex=0; rowIndex<numberOfRows; rowIndex++) {
 			rowHTML += '<tr role="row">';
 			for(columnIndex=0; columnIndex<numberOfColumns; columnIndex++) {
-				rowHTML += '<td role="cell"><div class="cusotmer-name"></div></td>';
+				rowHTML += '<td role="cell"><div class="cusotmer-text"></div></td>';
 			}
 			rowHTML += '</tr>';
 		}
@@ -141,7 +141,7 @@ var LifeGrid = (function() {
 			headerHTML;
 		headerHTML = '<div class="db-table-header"><table role="table-header"><tbody><colgroup><col style="width:20%"><col style="width:30%"><col style="width:30%"><col style="width:20%"></colgroup><tr>';
 		for(var index in headers) {
-			headerHTML += '<td><a href="#">' + headers[index] + ' <span class="db-icon db-icon-up"></span></a></td>';
+			headerHTML += '<td><a class="header" href="#">' + headers[index] + ' <span class="db-icon db-icon-up"></span></a></td>';
 		}
 		
 		headerHTML += "</tr></tbody></table></div>";
@@ -200,8 +200,11 @@ var LifeGrid = (function() {
 
 	/**
 	* @description - This method start injecting the data inside the grid
+	* @param startIndex {Number} - 0 based start index
+	* @param endIndex {Number} - 0 based end index
+	* @param dataGridIndex {Number} - 0 based end index of dataGrid, always 0 for single seriese
 	*/
-	startInjectingData = (function() {
+	startInjectingData = (function(startIndex, endIndex, dataGridIndex) {
 
 	});
 
@@ -222,7 +225,7 @@ var LifeGrid = (function() {
 			prepareDOM(gridHTML);
 			startAttachingAttribute();
 			startBindingEvents();
-			startInjectingData();
+			startInjectingData(0, (attributes.pagination.dataPerPage-1), 0);
 
 		} else { // for multiseriese
 			gridHTML = "";
@@ -235,6 +238,9 @@ var LifeGrid = (function() {
 			prepareDOM(gridHTML);
 			startAttachingAttribute();
 			startBindingEvents();
+			for(dataGridIndex in dataForGrid) {
+				startInjectingData(0, (attributes.pagination.dataPerPage-1), dataGridIndex);
+			}
 		}
 
 		console.log(gridHTML);
