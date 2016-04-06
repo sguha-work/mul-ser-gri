@@ -1,0 +1,412 @@
+/*
+Theme Name: FsuionCharts DataTable UI
+Theme URI: http://www.fusioncharts.com/ 
+Author: FusionCharts
+
+Used Normalizing styles - the fine work of Nicolas Gallagher and Jonathan Neal http://necolas.github.com/normalize.css/
+*/
+/* ===================================
+	TABLE OF CONTENT
+======================================
+# Normalize  
+# Typography
+# Layout
+# Elements
+# Forms
+# Buttons
+# Table
+# Modules
+--------------------------------------*/
+html {
+  font-family: sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+}
+
+audio,
+canvas,
+progress,
+video {
+  display: inline-block;
+  vertical-align: baseline;
+}
+
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+
+[hidden],
+template {
+  display: none;
+}
+
+a {
+  background-color: transparent;
+}
+
+a:active,
+a:hover {
+  outline: 0;
+}
+
+abbr[title] {
+  border-bottom: 1px dotted;
+}
+
+b,
+strong {
+  font-weight: bold;
+}
+
+dfn {
+  font-style: italic;
+}
+
+h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+mark {
+  background: #ff0;
+  color: #000;
+}
+
+small {
+  font-size: 80%;
+}
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+img {
+  border: 0;
+}
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+figure {
+  margin: 1em 40px;
+}
+
+hr {
+  box-sizing: content-box;
+  height: 0;
+}
+
+pre {
+  overflow: auto;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit;
+  font: inherit;
+  margin: 0;
+}
+
+button {
+  overflow: visible;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button;
+  cursor: pointer;
+}
+
+button[disabled],
+html input[disabled] {
+  cursor: default;
+}
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+input {
+  line-height: normal;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+input[type="search"] {
+  -webkit-appearance: textfield;
+  box-sizing: content-box;
+}
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+fieldset {
+  border: 1px solid #c0c0c0;
+  margin: 0 2px;
+  padding: 0.35em 0.625em 0.75em;
+}
+
+legend {
+  border: 0;
+  padding: 0;
+}
+
+textarea {
+  overflow: auto;
+}
+
+optgroup {
+  font-weight: bold;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td,
+th {
+  padding: 0;
+}
+
+body {
+  font-size: 14px;
+}
+
+.small {
+  font-size: 80%;
+}
+
+.db-table-caption .table-caption {
+  font-size: 20px;
+  margin: 0;
+}
+.db-table-caption p.small {
+  margin: 0;
+}
+
+.button {
+  background-color: #fafafa;
+  border: 1px solid #b7b7b7;
+  color: #5b5b5b;
+}
+
+table {
+  border: 1px solid #b7b7b7;
+  width: 100%;
+}
+table td {
+  border: 1px solid #d1d1d1;
+  padding: 10px;
+}
+
+.db-table-caption {
+  background-color: #2b2243;
+  color: #a799cb;
+  padding: 10px;
+}
+
+.db-table-header td {
+  background-color: #ededed;
+}
+.db-table-header td a {
+  display: block;
+  text-decoration: none;
+  color: #757575;
+}
+.db-table-header td a .db-icon {
+  display: inline-block;
+  *zoom: 1;
+  *display: inline;
+  text-indent: -99999px;
+  width: 15px;
+  height: 15px;
+  background: url(../images/sprite.png) no-repeat 0 0;
+  opacity: .6;
+  vertical-align: middle;
+}
+.db-table-header td a .db-icon.db-icon-up {
+  background-position: 0 -137px;
+}
+.db-table-header td a .db-icon.db-icon-down {
+  background-position: 0 -169px;
+}
+.db-table-header td a:hover {
+  color: #5b5b5b;
+}
+
+.db-table-data {
+  max-height: 362px;
+  overflow: auto;
+}
+.db-table-data table {
+  border: 1px solid #ededed;
+}
+.db-table-data tr td {
+  border: 0;
+  border-bottom: 1px solid #ededed;
+  color: #5b5b5b;
+}
+.db-table-data tr:last-child td {
+  border-bottom: 0;
+}
+.db-table-data .customer-img {
+  margin-right: 10px;
+}
+.db-table-data .customer-img img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  padding: 2px;
+  border: 1px solid #ededed;
+}
+.db-table-data .customer-img, .db-table-data .cusotmer-name {
+  display: inline-block;
+  *zoom: 1;
+  *display: inline;
+  vertical-align: middle;
+}
+
+.db-table-footer {
+  background-color: #ededed;
+  border: 1px solid #e0e0e0;
+  padding: 0 10px;
+}
+.db-table-footer a {
+  display: inline-block;
+  *zoom: 1;
+  *display: inline;
+  vertical-align: middle;
+}
+.db-table-footer .db-pagination {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+  *zoom: 1;
+  *display: inline;
+  vertical-align: middle;
+}
+.db-table-footer .db-pagination li {
+  float: left;
+}
+.db-table-footer .db-pagination li span, .db-table-footer .db-pagination li a {
+  display: block;
+  padding: 8px;
+}
+.db-table-footer .db-pagination li a {
+  text-decoration: none;
+  color: #8977ba;
+}
+.db-table-footer .db-pagination li a:hover {
+  color: #6c56a8;
+}
+.db-table-footer .db-pagination .page-link-selected {
+  background-color: #e0e0e0;
+}
+.db-table-footer .db-pagination-wrapper, .db-table-footer .db-search-wrapper, .db-table-footer .db-page-info-wrapper {
+  display: inline-block;
+  *zoom: 1;
+  *display: inline;
+  vertical-align: middle;
+  width: 33%;
+}
+.db-table-footer .db-page-info-wrapper {
+  text-align: right;
+}
+.db-table-footer .db-page-info-wrapper .db-page-info {
+  margin-right: 10px;
+}
+.db-table-footer .db-search-wrapper {
+  text-align: center;
+}
+.db-table-footer .db-icon {
+  display: block;
+  text-indent: -99999px;
+  width: 15px;
+  height: 15px;
+  background: url(../images/sprite.png) no-repeat 0 0;
+  opacity: .6;
+}
+.db-table-footer .db-icon.db-icon-left-arrow-previous {
+  background-position: 0 -49px;
+}
+.db-table-footer .db-icon.db-icon-left-arrow-first {
+  background-position: 0 -113px;
+}
+.db-table-footer .db-icon.db-icon-left-arrow-next {
+  background-position: 0 -17px;
+}
+.db-table-footer .db-icon.db-icon-right-arrow-last {
+  background-position: 0 -81px;
+}
+.db-table-footer .db-icon.db-icon-reload {
+  background-position: -32px -114px;
+}
+.db-table-footer .page-link:hover .db-icon {
+  opacity: 1;
+}

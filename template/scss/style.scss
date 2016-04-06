@@ -1,0 +1,35 @@
+/*
+Theme Name: FsuionCharts DataTable UI
+Theme URI: http://www.fusioncharts.com/ 
+Author: FusionCharts
+
+Used Normalizing styles - the fine work of Nicolas Gallagher and Jonathan Neal http://necolas.github.com/normalize.css/
+*/
+
+/* ===================================
+	TABLE OF CONTENT
+======================================
+# Normalize  
+# Typography
+# Layout
+# Elements
+# Forms
+# Buttons
+# Table
+# Modules
+--------------------------------------*/
+
+
+
+@import "variables";
+@import "mixins/mixins"; 
+
+@import "normalize";
+@import "typography";
+@import "site";
+@import "layout";
+@import "elements";
+@import "forms";
+@import "buttons";
+@import "table";
+@import "modules";
