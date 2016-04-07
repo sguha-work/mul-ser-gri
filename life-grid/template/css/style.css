@@ -324,7 +324,7 @@ table td {
   padding: 2px;
   border: 1px solid #ededed;
 }
-.db-table-data .customer-img, .db-table-data .cusotmer-text {
+.db-table-data .customer-img, .db-table-data .customer-text {
   display: inline-block;
   *zoom: 1;
   *display: inline;

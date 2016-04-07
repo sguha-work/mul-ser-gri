@@ -17,6 +17,7 @@ var LifeGrid = (function() {
 		prepareTableFooter,
 		userGivenAttributes,
 		common,
+		injectData, // {Function} inject data to the grid
 		addResourceToPage,
 		startInjectingData,
 		startIndexOfDisplayedData; //{Array} holds the start index of every grid's dislayed data
@@ -27,6 +28,7 @@ var LifeGrid = (function() {
 	this.api; // {Object} holds all the api methods
 
 	attributes = {
+		isAnimate: true,
 		style: {
 			border: "solid", // {String}, border of the table
 			borderWidth: 0, // {Number}, width of the border
@@ -120,11 +122,11 @@ var LifeGrid = (function() {
 		var rowIndex,
 			rowHTML,
 			columnIndex;
-		rowHTML = '<div class="db-table-data"><table role="data-table"><tbody><colgroup><col style="width:20%"><col style="width:30%"><col style="width:30%"><col style="width:20%"></colgroup>';	
+		rowHTML = '<div class="db-table-data"><table class="data-table" role="data-table"><tbody><colgroup><col style="width:20%"><col style="width:30%"><col style="width:30%"><col style="width:20%"></colgroup>';	
 		for(rowIndex=0; rowIndex<numberOfRows; rowIndex++) {
 			rowHTML += '<tr role="row">';
 			for(columnIndex=0; columnIndex<numberOfColumns; columnIndex++) {
-				rowHTML += '<td role="cell"><div class="cusotmer-text"></div></td>';
+				rowHTML += '<td role="cell"><div class="customer-text"></div></td>';
 			}
 			rowHTML += '</tr>';
 		}
@@ -197,6 +199,9 @@ var LifeGrid = (function() {
 		if(totalNumberOfData < attributes.pagination.dataPerPage) {
 			firstIndexOfDisplayedData = 1;
 			lastIndexOfDisplayedData = totalNumberOfData;
+		} else {
+			firstIndexOfDisplayedData = "";
+			lastIndexOfDisplayedData = "";
 		}
 
 		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="text" class="search"><input type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label>' + firstIndexOfDisplayedData + '</label> - <label>' + lastIndexOfDisplayedData + '</label> of ' + totalNumberOfData + ' items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
@@ -233,6 +238,37 @@ var LifeGrid = (function() {
 	});
 
 	/**
+	* @description - This method inject data into grid
+	* @param startIndex {Number} - 0 based start index of data
+	* @param endIndex {Number} - 0 based end index of data
+	* @param dataGridIndex {Number} - 0 based end index of dataGrid, always 0 for single seriese
+	*/
+	injectData = (function(startIndex, endIndex, dataGridIndex) {
+		var dataIndex, 
+			isId,
+			tableDOM;
+		if(document.getElementById(gridContainer)) {
+			isId = true;
+		} else {
+			isId = false;
+		}
+
+		if(isId) {
+			tableDOM = jQuery("#"+gridContainer+" table.data-table").eq(dataGridIndex);
+		}
+		if(attributes.isAnimate) {
+			jQuery("div.cusotmer-text", tableDOM)
+		} else {
+
+		}
+
+		for(dataIndex = startIndex; dataIndex <= endIndex; dataIndex++) {
+			
+
+		}
+	});
+
+	/**
 	* @description - This method start injecting the data inside the grid
 	* @param startIndex {Number} - 0 based start index
 	* @param endIndex {Number} - 0 based end index
@@ -240,6 +276,7 @@ var LifeGrid = (function() {
 	*/
 	startInjectingData = (function(startIndex, endIndex, dataGridIndex) {
 		startIndexOfDisplayedData = startIndex;
+		injectData(startIndex, endIndex, dataGridIndex);
 	});
 
 	/**
@@ -254,7 +291,7 @@ var LifeGrid = (function() {
 		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
 			gridHTML = prepareTableCaption();
 			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
-			gridHTML += prepareRowOfTable(dataForGrid[0].data.value.length, attributes.pagination.dataPerPage);
+			gridHTML += prepareRowOfTable(dataForGrid[0].data.value.length, dataForGrid[0].data.value[0].length);
 			gridHTML += prepareTableFooter();
 			prepareDOM(gridHTML);
 			startAttachingAttribute();
@@ -266,7 +303,7 @@ var LifeGrid = (function() {
 			for(dataGridIndex in dataForGrid) {
 				gridHTML += prepareTableCaption();
 				gridHTML += prepareTableHeader(dataForGrid[dataGridIndex].data.label);	
-				gridHTML += prepareRowOfTable(dataForGrid[dataGridIndex].data.value.length, attributes.pagination.dataPerPage);
+				gridHTML += prepareRowOfTable(dataForGrid[dataGridIndex].data.value.length, dataForGrid[dataGridIndex].data.value[0].length);
 				gridHTML += prepareTableFooter(dataGridIndex);
 			}
 			prepareDOM(gridHTML);
