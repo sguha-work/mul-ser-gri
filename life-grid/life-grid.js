@@ -166,15 +166,39 @@ var LifeGrid = (function() {
 	prepareTableFooter = (function(gridIndex) {
 		var footerHTML,
 			totalNumberOfData,
-			totalNumberOfPages;
+			totalNumberOfPages,
+			pageNumberHTML,
+			pageIndex,
+			dataStartIndex,
+			dataEndIndex,
+			firstIndexOfDisplayedData,
+			lastIndexOfDisplayedData;
 
+		// pagination calculation
 		totalNumberOfData = dataForGrid[gridIndex].data.value.length;
-		totalNumberOfPages = (totalNumberOfData<attributes.pagination.dataPerPage)?1:
-									((totalNumberOfData % attributes.pagination.dataPerPage)?
-								    Math.floor((totalNumberOfData % attributes.pagination.dataPerPage)):
-								    (Math.floor((totalNumberOfData % attributes.pagination.dataPerPage))+1));
-		alert(totalNumberOfPages);							
-		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination"><li><a href="#" class="page-link">1</a></li><li><a href="#" class="page-link">2</a></li><li><a href="#" class="page-link">3</a></li><li><a href="#" class="page-link">4</a></li><li><span class="page-link-selected">5</span></li><li><a href="#" class="page-link" title="More pages">...</a></li></ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="text" class="search"><input type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info">91 - 91 of 91 items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
+		totalNumberOfPages = (totalNumberOfData<attributes.pagination.dataPerPage)?1:((totalNumberOfData % attributes.pagination.dataPerPage)?(Math.floor((totalNumberOfData / attributes.pagination.dataPerPage))+1):(Math.floor((totalNumberOfData / attributes.pagination.dataPerPage))));
+		pageNumberHTML = "";							
+		
+		for(pageIndex=1; pageIndex<=totalNumberOfPages; pageIndex++) {
+			dataStartIndex = ((pageIndex-1)*attributes.pagination.dataPerPage);
+			dataEndIndex = dataStartIndex +  attributes.pagination.dataPerPage -1;
+			if(pageIndex <= 5) {
+				pageNumberHTML += '<li><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
+			} else {
+				if(pageIndex == 6) {
+					pageNumberHTML += '<li><aclass="page-link"  title="More pages">......</a></li>';					
+				}
+				pageNumberHTML += '<li style="display:none"><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
+			}
+		}
+
+		// page info calculation
+		if(totalNumberOfData < attributes.pagination.dataPerPage) {
+			firstIndexOfDisplayedData = 1;
+			lastIndexOfDisplayedData = totalNumberOfData;
+		}
+
+		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="text" class="search"><input type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label>' + firstIndexOfDisplayedData + '</label> - <label>' + lastIndexOfDisplayedData + '</label> of ' + totalNumberOfData + ' items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
 		return footerHTML;
 	});
 
@@ -195,10 +219,9 @@ var LifeGrid = (function() {
 	* @description - Begins attaching attribute (both default and user given) to the grid
 	*/
 	startAttachingAttribute = (function() {
-		
 		// merging user given attributes to main attribute
 		attributes = common.mergeObject(attributes, userGivenAttributes);
-		console.log(attributes);
+		
 	});
 
 	/**
@@ -252,8 +275,6 @@ var LifeGrid = (function() {
 				startInjectingData(0, (attributes.pagination.dataPerPage-1), dataGridIndex);
 			}
 		}
-
-		console.log(gridHTML);
 	});
 
 	/**
