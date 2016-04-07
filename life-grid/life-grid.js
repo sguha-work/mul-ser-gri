@@ -126,7 +126,7 @@ var LifeGrid = (function() {
 		for(rowIndex=0; rowIndex<numberOfRows; rowIndex++) {
 			rowHTML += '<tr role="row">';
 			for(columnIndex=0; columnIndex<numberOfColumns; columnIndex++) {
-				rowHTML += '<td role="cell"><div class="customer-text"></div></td>';
+				rowHTML += '<td role="cell"><div class="cell-data"></div></td>';
 			}
 			rowHTML += '</tr>';
 		}
@@ -155,9 +155,16 @@ var LifeGrid = (function() {
 	* @description - This function prepare the table caption
 	* @return {String} - Caption HTML
 	*/
-	prepareTableCaption = (function() {
+	prepareTableCaption = (function(dataGridIndex) {
 		var captionHTML;
-		captionHTML = '<div class="db-table-wrapper"><div class="db-table-caption"><h1 class="table-caption">FusionCharts Data Table</h1><p class="small">Drag a column header and drop it here to group by that column</p></div><div class="db-table-header">';
+		captionHTML = '<div class="db-table-wrapper">';
+		if(typeof dataForGrid[dataGridIndex].caption != "undefined") {
+			captionHTML += '<div class="db-table-caption"><h1 class="table-caption">'+dataForGrid[dataGridIndex].caption+'</h1>';
+		}
+		if(typeof dataForGrid[dataGridIndex].subCaption != "undefined") {
+			captionHTML += '<p class="small">' + dataForGrid[dataGridIndex].subCaption + '</p>';
+		}
+		captionHTML += '</div><div class="db-table-header">';
 		return captionHTML;
 	});
 
@@ -246,7 +253,34 @@ var LifeGrid = (function() {
 	injectData = (function(startIndex, endIndex, dataGridIndex) {
 		var dataIndex, 
 			isId,
-			tableDOM;
+			tableDOM,
+			setDataToCell;
+
+		setDataToCell = (function(tableDOM, dataGridIndex) {
+			var dataRowIndex,
+				tr,
+				dataIndex,
+				dataHTML;
+			for(dataRowIndex in dataForGrid[dataGridIndex].data.value) {
+				tr = jQuery("tr",tableDOM).eq(dataRowIndex);
+				for(dataIndex in dataForGrid[dataGridIndex].data.value[dataRowIndex]) {
+					dataHTML = "";
+					if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] == "object") {
+						if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] != "undefined") {
+							dataHTML += '<div class="customer-img"><img src="' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] + '" width="" height="" alt="Indranil"></div>';
+						}
+						if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] != "undefined") {
+							dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] + '</div>';
+						}
+						
+					} else {
+						dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] + '</div>';
+					}
+					jQuery("div.cell-data", tr).eq(dataIndex).html(dataHTML);
+				}
+			}
+		});	
+
 		if(document.getElementById(gridContainer)) {
 			isId = true;
 		} else {
@@ -257,15 +291,21 @@ var LifeGrid = (function() {
 			tableDOM = jQuery("#"+gridContainer+" table.data-table").eq(dataGridIndex);
 		}
 		if(attributes.isAnimate) {
-			jQuery("div.cusotmer-text", tableDOM)
+			jQuery("div.cell-data", tableDOM).hide(1000, function() {
+				jQuery("div.cell-data", tableDOM).css({
+					"display": "block",
+					"visibility": "hidden"
+				});
+				setDataToCell(tableDOM, dataGridIndex);
+				jQuery("div.cell-data", tableDOM).css({
+					"visibility": "visible"
+				});
+			});
 		} else {
-
+			setDataToCell(tableDOM, dataGridIndex);
 		}
 
-		for(dataIndex = startIndex; dataIndex <= endIndex; dataIndex++) {
-			
-
-		}
+		
 	});
 
 	/**
@@ -289,7 +329,7 @@ var LifeGrid = (function() {
 			dataGridIndex;
 
 		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
-			gridHTML = prepareTableCaption();
+			gridHTML = prepareTableCaption(0);
 			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
 			gridHTML += prepareRowOfTable(dataForGrid[0].data.value.length, dataForGrid[0].data.value[0].length);
 			gridHTML += prepareTableFooter();
@@ -301,7 +341,7 @@ var LifeGrid = (function() {
 		} else { // for multiseriese
 			gridHTML = "";
 			for(dataGridIndex in dataForGrid) {
-				gridHTML += prepareTableCaption();
+				gridHTML += prepareTableCaption(dataGridIndex);
 				gridHTML += prepareTableHeader(dataForGrid[dataGridIndex].data.label);	
 				gridHTML += prepareRowOfTable(dataForGrid[dataGridIndex].data.value.length, dataForGrid[dataGridIndex].data.value[0].length);
 				gridHTML += prepareTableFooter(dataGridIndex);
