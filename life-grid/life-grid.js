@@ -160,10 +160,20 @@ var LifeGrid = (function() {
 
 	/**
 	* @description - This function prepare the table footer (search option, pagination)
+	* @param gridIndex {Number} - The index of the grid, always 0 for Single seriese
 	* @return {String} - Caption HTML
 	*/
-	prepareTableFooter = (function() {
-		var footerHTML;
+	prepareTableFooter = (function(gridIndex) {
+		var footerHTML,
+			totalNumberOfData,
+			totalNumberOfPages;
+
+		totalNumberOfData = dataForGrid[gridIndex].data.value.length;
+		totalNumberOfPages = (totalNumberOfData<attributes.pagination.dataPerPage)?1:
+									((totalNumberOfData % attributes.pagination.dataPerPage)?
+								    Math.floor((totalNumberOfData % attributes.pagination.dataPerPage)):
+								    (Math.floor((totalNumberOfData % attributes.pagination.dataPerPage))+1));
+		alert(totalNumberOfPages);							
 		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination"><li><a href="#" class="page-link">1</a></li><li><a href="#" class="page-link">2</a></li><li><a href="#" class="page-link">3</a></li><li><a href="#" class="page-link">4</a></li><li><span class="page-link-selected">5</span></li><li><a href="#" class="page-link" title="More pages">...</a></li></ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="text" class="search"><input type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info">91 - 91 of 91 items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
 		return footerHTML;
 	});
@@ -233,7 +243,7 @@ var LifeGrid = (function() {
 				gridHTML += prepareTableCaption();
 				gridHTML += prepareTableHeader(dataForGrid[dataGridIndex].data.label);	
 				gridHTML += prepareRowOfTable(dataForGrid[dataGridIndex].data.value.length, attributes.pagination.dataPerPage);
-				gridHTML += prepareTableFooter();
+				gridHTML += prepareTableFooter(dataGridIndex);
 			}
 			prepareDOM(gridHTML);
 			startAttachingAttribute();
