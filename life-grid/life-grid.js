@@ -18,7 +18,8 @@ var LifeGrid = (function() {
 		userGivenAttributes,
 		common,
 		addResourceToPage,
-		startInjectingData;
+		startInjectingData,
+		startIndexOfDisplayedData; //{Array} holds the start index of every grid's dislayed data
 
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
@@ -238,7 +239,7 @@ var LifeGrid = (function() {
 	* @param dataGridIndex {Number} - 0 based end index of dataGrid, always 0 for single seriese
 	*/
 	startInjectingData = (function(startIndex, endIndex, dataGridIndex) {
-
+		startIndexOfDisplayedData = startIndex;
 	});
 
 	/**

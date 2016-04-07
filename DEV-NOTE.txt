@@ -3,3 +3,5 @@ headers are the coloumn names
 for multiseries data if caption text is not provided  the seriese key will be the caption
 
 attribute settings will be injected synchronusly after the grid is ready
+
+on page change from pagination "startIndexOfDisplayedData" this variable's value should be changed
