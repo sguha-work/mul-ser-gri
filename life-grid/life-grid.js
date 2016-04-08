@@ -17,7 +17,9 @@ var LifeGrid = (function() {
 		prepareTableFooter,
 		userGivenAttributes,
 		common,
-		injectData, // {Function} inject data to the grid
+		gridOperations,
+		prepareGridContainerDOM,
+		injectDataFromDataForGrid, // {Function} inject data to the grid
 		addResourceToPage,
 		startInjectingData,
 		startIndexOfDisplayedData; //{Array} holds the start index of every grid's dislayed data
@@ -49,7 +51,7 @@ var LifeGrid = (function() {
 			subCaptionFontSize: "",
 			subCaptionFontStyle: "",
 			subCaptionHoverColor: [],
-			subClaptionHoverFillColor: []
+			subCaptionHoverFillColor: []
 		},
 
 		heading: {
@@ -112,17 +114,50 @@ var LifeGrid = (function() {
 		return object1;
 	});
 
+	// gridOperations holds the functionality like search sort pagination on the grid
+	gridOperations = {};
+
+	/**
+	* @description - This function prepare rows for data
+	* @param searchText {String} - The text which will be searched
+	* @param dataGridIndex {Number} - The 0 based index of grid
+	* @param searchEntireData {Boolean} - If set then entire data will be searched rather than the displayed data
+	* @return {Boolean} - The table row html
+	*/
+	gridOperations.searchGrid = (function(searchText, dataGridIndex, searchEntireData) {
+		var flag;
+		if(!searchEntireData) { // search only the displayed grid
+			if(searchText === "") {
+				jQuery("table[data-grid-index='" + dataGridIndex + "'] tr", gridContainer).show();	
+			}
+			jQuery("table[data-grid-index='" + dataGridIndex + "'] tr", gridContainer).each(function() {
+				jQuery("td", this).each(function(){
+					if(jQuery.trim(jQuery(this).text()).indexOf(searchText) === -1) {
+						if(attributes.isAnimate) {
+							jQuery(this).parent().hide("slow");
+						} else {
+							jQuery(this).parent().hide();
+						}
+					} else {
+						jQuery(this).parent().show();
+					}
+				});
+			});
+		}	
+	});
+
 	/**
 	* @description - This function prepare rows for data
 	* @param numberOfRows {Number} - Number of rows
 	* @param numberOfColoumns {Number} - Number of columns
+	* @param dataGridIndex {Number} - 0 based index of the grid
 	* @return {Boolean} - The table row html
 	*/
-	prepareRowOfTable = (function(numberOfRows, numberOfColumns) {
+	prepareRowOfTable = (function(numberOfRows, numberOfColumns, dataGridIndex) {
 		var rowIndex,
 			rowHTML,
 			columnIndex;
-		rowHTML = '<div class="db-table-data"><table class="data-table" role="data-table"><tbody><colgroup><col style="width:20%"><col style="width:30%"><col style="width:30%"><col style="width:20%"></colgroup>';	
+		rowHTML = '<div class="db-table-data"><table data-grid-index="' + dataGridIndex + '" class="data-table" role="data-table"><tbody><colgroup><col style="width:20%"><col style="width:30%"><col style="width:30%"><col style="width:20%"></colgroup>';	
 		for(rowIndex=0; rowIndex<numberOfRows; rowIndex++) {
 			rowHTML += '<tr role="row">';
 			for(columnIndex=0; columnIndex<numberOfColumns; columnIndex++) {
@@ -211,7 +246,7 @@ var LifeGrid = (function() {
 			lastIndexOfDisplayedData = "";
 		}
 
-		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label>' + firstIndexOfDisplayedData + '</label> - <label>' + lastIndexOfDisplayedData + '</label> of ' + totalNumberOfData + ' items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
+		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label>' + firstIndexOfDisplayedData + '</label> - <label>' + lastIndexOfDisplayedData + '</label> of ' + totalNumberOfData + ' items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
 		return footerHTML;
 	});
 
@@ -221,11 +256,7 @@ var LifeGrid = (function() {
 	* @param gridHTML {String} - The html string
 	*/
 	prepareDOM = (function(gridHTML) {
-		if(document.getElementById(gridContainer)) {
-			document.getElementById(gridContainer).innerHTML = gridHTML;
-		} else if(document.getElementsByClassName(gridContainer)) {
-			document.getElementsByClassName(gridContainer)[0].innerHTML = gridHTML;
-		}
+		gridContainer.innerHTML = gridHTML;
 	});
 
 	/**
@@ -241,7 +272,14 @@ var LifeGrid = (function() {
 	* @description - Begins binding various predefined events to the grid
 	*/
 	startBindingEvents = (function() {
-
+		// Attaching search event
+		jQuery("input[value='Search']",gridContainer).on('click', function() {
+			if(jQuery(this).prev().prev().prev().is(":checked")) {
+				gridOperations.searchGrid(jQuery.trim(jQuery(this).prev().val()), parseInt(jQuery(this).attr('data-grid-index')), 1);
+			} else {
+				gridOperations.searchGrid(jQuery.trim(jQuery(this).prev().val()), parseInt(jQuery(this).attr('data-grid-index')), 0);	
+			}
+		});
 	});
 
 	/**
@@ -250,7 +288,7 @@ var LifeGrid = (function() {
 	* @param endIndex {Number} - 0 based end index of data
 	* @param dataGridIndex {Number} - 0 based end index of dataGrid, always 0 for single seriese
 	*/
-	injectData = (function(startIndex, endIndex, dataGridIndex) {
+	injectDataFromDataForGrid = (function(startIndex, endIndex, dataGridIndex) {
 		var dataIndex, 
 			isId,
 			tableDOM,
@@ -281,15 +319,8 @@ var LifeGrid = (function() {
 			}
 		});	
 
-		if(document.getElementById(gridContainer)) {
-			isId = true;
-		} else {
-			isId = false;
-		}
-
-		if(isId) {
-			tableDOM = jQuery("#"+gridContainer+" table.data-table").eq(dataGridIndex);
-		}
+		tableDOM = jQuery("table.data-table", gridContainer).eq(dataGridIndex);
+		
 		if(attributes.isAnimate) {
 			jQuery("div.cell-data", tableDOM).hide(1000, function() {
 				jQuery("div.cell-data", tableDOM).css({
@@ -316,7 +347,7 @@ var LifeGrid = (function() {
 	*/
 	startInjectingData = (function(startIndex, endIndex, dataGridIndex) {
 		startIndexOfDisplayedData = startIndex;
-		injectData(startIndex, endIndex, dataGridIndex);
+		injectDataFromDataForGrid(startIndex, endIndex, dataGridIndex);
 	});
 
 	/**
@@ -331,8 +362,8 @@ var LifeGrid = (function() {
 		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
 			gridHTML = prepareTableCaption(0);
 			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
-			gridHTML += prepareRowOfTable(dataForGrid[0].data.value.length, dataForGrid[0].data.value[0].length);
-			gridHTML += prepareTableFooter();
+			gridHTML += prepareRowOfTable(dataForGrid[0].data.value.length, dataForGrid[0].data.value[0].length, 0);
+			gridHTML += prepareTableFooter(0);
 			prepareDOM(gridHTML);
 			startAttachingAttribute();
 			startBindingEvents();
@@ -343,7 +374,7 @@ var LifeGrid = (function() {
 			for(dataGridIndex in dataForGrid) {
 				gridHTML += prepareTableCaption(dataGridIndex);
 				gridHTML += prepareTableHeader(dataForGrid[dataGridIndex].data.label);	
-				gridHTML += prepareRowOfTable(dataForGrid[dataGridIndex].data.value.length, dataForGrid[dataGridIndex].data.value[0].length);
+				gridHTML += prepareRowOfTable(dataForGrid[dataGridIndex].data.value.length, dataForGrid[dataGridIndex].data.value[0].length, dataGridIndex);
 				gridHTML += prepareTableFooter(dataGridIndex);
 			}
 			prepareDOM(gridHTML);
@@ -365,6 +396,21 @@ var LifeGrid = (function() {
 	});
 
 	/**
+	* @description - Prepare the grid container DOM from identity
+	* @param containerText {String} - The identity of the DOM element
+	* @return {Object} - DOM object javascript
+	*/
+	prepareGridContainerDOM = (function(containerText) {
+		if(document.getElementById(containerText)) {
+			return document.getElementById(containerText);
+		} else if(document.getElementsByClassName(containerText)[0]){
+			return document.getElementsByClassName(containerText)[0];
+		} else {
+			return document.querySelector(containerText)[0];
+		}
+	});
+
+	/**
 	* @description - This function is the constructor of LifeGrid
 	* @param gridId {String} - The unique id of grid
 	* @param containerId {String} - The container DOM id where the grid is going to be populated
@@ -375,7 +421,7 @@ var LifeGrid = (function() {
 	this.initialize = (function(values) {
 		if(checkArgumentsForError(values)) {
 			gridId = values[0]; 
-			gridContainer = values[1]; 
+			gridContainer = prepareGridContainerDOM(values[1]); 
 			userGivenAttributes = values[2];
 			dataForGrid = values[3];
 			addResourceToPage();
