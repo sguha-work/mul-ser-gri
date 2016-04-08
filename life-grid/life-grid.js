@@ -126,7 +126,7 @@ var LifeGrid = (function() {
 	*/
 	gridOperations.searchGrid = (function(searchText, dataGridIndex, searchEntireData) {
 		var flag;
-		if(!searchEntireData) { // search only the displayed grid
+		if(!searchEntireData) { // search only the displayed gridl
 			if(searchText === "") {
 				jQuery("table[data-grid-index='" + dataGridIndex + "'] tr", gridContainer).show();	
 			}
@@ -134,12 +134,16 @@ var LifeGrid = (function() {
 				jQuery("td", this).each(function(){
 					if(jQuery.trim(jQuery(this).text()).indexOf(searchText) === -1) {
 						if(attributes.isAnimate) {
-							jQuery(this).parent().hide("slow");
+							jQuery(this).parent().animate({"opacity": "0"}, 1000);
 						} else {
-							jQuery(this).parent().hide();
+							jQuery(this).parent().css({
+								"opacity": "0"
+							});
 						}
 					} else {
-						jQuery(this).parent().show();
+						jQuery(this).parent().css({
+							"opacity": "1"
+						});
 					}
 				});
 			});
@@ -280,6 +284,15 @@ var LifeGrid = (function() {
 				gridOperations.searchGrid(jQuery.trim(jQuery(this).prev().val()), parseInt(jQuery(this).attr('data-grid-index')), 0);	
 			}
 		});
+		jQuery("input[value='Search']",gridContainer).prev().on('change', function() {console.log("x");
+			if(jQuery(this).prev().prev().is(":checked")) {
+				gridOperations.searchGrid(jQuery.trim(jQuery(this).val()), parseInt(jQuery(this).next().attr('data-grid-index')), 1);
+			} else {
+				gridOperations.searchGrid(jQuery.trim(jQuery(this).val()), parseInt(jQuery(this).next().attr('data-grid-index')), 0);	
+			}
+		})
+
+
 	});
 
 	/**
