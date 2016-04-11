@@ -125,27 +125,30 @@ var LifeGrid = (function() {
 	* @return {Boolean} - The table row html
 	*/
 	gridOperations.searchGrid = (function(searchText, dataGridIndex, searchEntireData) {
-		var flag;
+		var dataFoundFlag;
 		if(!searchEntireData) { // search only the displayed gridl
 			if(searchText === "") {
-				jQuery("table[data-grid-index='" + dataGridIndex + "'] tr", gridContainer).show();	
+				jQuery("table[data-grid-index='" + dataGridIndex + "'] tr", gridContainer).css({
+					"opacity": "1"
+				});	
 			}
 			jQuery("table[data-grid-index='" + dataGridIndex + "'] tr", gridContainer).each(function() {
+				dataFoundFlag = 0;
 				jQuery("td", this).each(function(){
-					if(jQuery.trim(jQuery(this).text()).indexOf(searchText) === -1) {
-						if(attributes.isAnimate) {
-							jQuery(this).parent().animate({"opacity": "0"}, 1000);
-						} else {
-							jQuery(this).parent().css({
-								"opacity": "0"
-							});
-						}
-					} else {
-						jQuery(this).parent().css({
-							"opacity": "1"
-						});
+					if(jQuery.trim(jQuery(this).text()).toLowerCase().indexOf(jQuery.trim(searchText).toLowerCase()) != -1) {
+						dataFoundFlag = 1;	
+						return false;
 					}
 				});
+				if(dataFoundFlag) {
+					jQuery(this).css({
+						"opacity": "1"
+					});
+				} else {
+					jQuery(this).css({
+						"opacity": "0"
+					});
+				}
 			});
 		}	
 	});
@@ -284,13 +287,14 @@ var LifeGrid = (function() {
 				gridOperations.searchGrid(jQuery.trim(jQuery(this).prev().val()), parseInt(jQuery(this).attr('data-grid-index')), 0);	
 			}
 		});
-		jQuery("input[value='Search']",gridContainer).prev().on('change', function() {console.log("x");
+		
+		jQuery("input[value='Search']",gridContainer).prev().on('change keyup paste', function() {
 			if(jQuery(this).prev().prev().is(":checked")) {
 				gridOperations.searchGrid(jQuery.trim(jQuery(this).val()), parseInt(jQuery(this).next().attr('data-grid-index')), 1);
 			} else {
 				gridOperations.searchGrid(jQuery.trim(jQuery(this).val()), parseInt(jQuery(this).next().attr('data-grid-index')), 0);	
 			}
-		})
+		});
 
 
 	});
