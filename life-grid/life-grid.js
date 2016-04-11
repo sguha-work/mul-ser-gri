@@ -23,6 +23,7 @@ var LifeGrid = (function() {
 		addResourceToPage,
 		startInjectingData,
 		startIndexOfDisplayedData, //{Array} holds the start index of every grid's dislayed data
+		endIndexOfDisplayedData, //{Array} holds the end index of every grid's dislayed data
 		setDataToCell;
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
@@ -244,16 +245,9 @@ var LifeGrid = (function() {
 			}
 		}
 
-		// page info calculation
-		if(totalNumberOfData < attributes.pagination.dataPerPage) {
-			firstIndexOfDisplayedData = 1;
-			lastIndexOfDisplayedData = totalNumberOfData;
-		} else {
-			firstIndexOfDisplayedData = "";
-			lastIndexOfDisplayedData = "";
-		}
+		
 
-		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label>' + firstIndexOfDisplayedData + '</label> - <label>' + lastIndexOfDisplayedData + '</label> of ' + totalNumberOfData + ' items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
+		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label></label> - <label></label> of ' + totalNumberOfData + ' items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
 		return footerHTML;
 	});
 
@@ -322,6 +316,7 @@ var LifeGrid = (function() {
 				jQuery("div.cell-data", tr).eq(dataIndex).html(dataHTML);
 			}
 		}
+
 	});
 	
 	/**
@@ -366,7 +361,18 @@ var LifeGrid = (function() {
 	* @param dataGridIndex {Number} - 0 based end index of dataGrid, always 0 for single seriese
 	*/
 	startInjectingData = (function(startIndex, endIndex, dataGridIndex) {
-		startIndexOfDisplayedData = startIndex;
+		var pageInfoDiv;
+		if(typeof startIndexOfDisplayedData == "undefined") {
+			startIndexOfDisplayedData = [];
+		}
+		if(typeof endIndexOfDisplayedData == "undefined") {
+			endIndexOfDisplayedData = [];
+		}
+		startIndexOfDisplayedData[dataGridIndex] = startIndex;
+		endIndexOfDisplayedData[dataGridIndex] = (dataForGrid[dataGridIndex].data.value.length<attributes.pagination.dataPerPage)?(dataForGrid[dataGridIndex].data.value.length-1):(startIndex+attributes.pagination.dataPerPage-1);
+		pageInfoDiv = jQuery(".db-page-info", gridContainer).eq(dataGridIndex);
+		jQuery("label", pageInfoDiv).eq(0).text(startIndexOfDisplayedData[dataGridIndex]+1);
+		jQuery("label", pageInfoDiv).eq(1).text(endIndexOfDisplayedData[dataGridIndex]+1);
 		injectDataFromDataForGrid(startIndex, endIndex, dataGridIndex);
 	});
 
