@@ -22,8 +22,8 @@ var LifeGrid = (function() {
 		injectDataFromDataForGrid, // {Function} inject data to the grid
 		addResourceToPage,
 		startInjectingData,
-		startIndexOfDisplayedData; //{Array} holds the start index of every grid's dislayed data
-
+		startIndexOfDisplayedData, //{Array} holds the start index of every grid's dislayed data
+		setDataToCell;
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
 	this.render; // Render the grid inside container
@@ -299,6 +299,31 @@ var LifeGrid = (function() {
 
 	});
 
+	setDataToCell = (function(tableDOM, dataGridIndex, startIndex, endIndex) {
+		var dataRowIndex,
+			tr,
+			dataIndex,
+			dataHTML;
+		for(dataRowIndex=startIndex; dataRowIndex<=endIndex; dataRowIndex++) {
+			tr = jQuery("tr",tableDOM).eq(dataRowIndex);
+			for(dataIndex in dataForGrid[dataGridIndex].data.value[dataRowIndex]) {
+				dataHTML = "";
+				if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] == "object") {
+					if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] != "undefined") {
+						dataHTML += '<div class="customer-img"><img src="' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] + '" width="" height="" alt="Indranil"></div>';
+					}
+					if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] != "undefined") {
+						dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] + '</div>';
+					}
+					
+				} else {
+					dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] + '</div>';
+				}
+				jQuery("div.cell-data", tr).eq(dataIndex).html(dataHTML);
+			}
+		}
+	});
+	
 	/**
 	* @description - This method inject data into grid
 	* @param startIndex {Number} - 0 based start index of data
@@ -309,48 +334,26 @@ var LifeGrid = (function() {
 		var dataIndex, 
 			isId,
 			tableDOM,
-			setDataToCell;
-
-		setDataToCell = (function(tableDOM, dataGridIndex) {
-			var dataRowIndex,
-				tr,
-				dataIndex,
-				dataHTML;
-			for(dataRowIndex in dataForGrid[dataGridIndex].data.value) {
-				tr = jQuery("tr",tableDOM).eq(dataRowIndex);
-				for(dataIndex in dataForGrid[dataGridIndex].data.value[dataRowIndex]) {
-					dataHTML = "";
-					if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] == "object") {
-						if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] != "undefined") {
-							dataHTML += '<div class="customer-img"><img src="' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] + '" width="" height="" alt="Indranil"></div>';
-						}
-						if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] != "undefined") {
-							dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] + '</div>';
-						}
-						
-					} else {
-						dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] + '</div>';
-					}
-					jQuery("div.cell-data", tr).eq(dataIndex).html(dataHTML);
-				}
-			}
-		});	
+			isHiddenFlag;
 
 		tableDOM = jQuery("table.data-table", gridContainer).eq(dataGridIndex);
 		
 		if(attributes.isAnimate) {
 			jQuery("div.cell-data", tableDOM).hide(1000, function() {
-				jQuery("div.cell-data", tableDOM).css({
-					"display": "block",
-					"visibility": "hidden"
-				});
-				setDataToCell(tableDOM, dataGridIndex);
-				jQuery("div.cell-data", tableDOM).css({
-					"visibility": "visible"
-				});
+				if(jQuery("div.cell-data", tableDOM).eq(jQuery("div.cell-data", tableDOM).length-1).is(":hidden")) {
+					jQuery("div.cell-data", tableDOM).css({
+						"display": "block",
+						"visibility": "hidden"
+					});
+					setDataToCell(tableDOM, dataGridIndex, startIndex, endIndex);
+					jQuery("div.cell-data", tableDOM).css({
+						"visibility": "visible"
+					});	
+				}
+				
 			});
 		} else {
-			setDataToCell(tableDOM, dataGridIndex);
+			setDataToCell(tableDOM, dataGridIndex, startIndex, endIndex);
 		}
 
 		
@@ -379,7 +382,7 @@ var LifeGrid = (function() {
 		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
 			gridHTML = prepareTableCaption(0);
 			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
-			gridHTML += prepareRowOfTable(dataForGrid[0].data.value.length, dataForGrid[0].data.value[0].length, 0);
+			gridHTML += prepareRowOfTable(attributes.pagination.dataPerPage, dataForGrid[0].data.value[0].length, 0);
 			gridHTML += prepareTableFooter(0);
 			prepareDOM(gridHTML);
 			startAttachingAttribute();
@@ -391,7 +394,7 @@ var LifeGrid = (function() {
 			for(dataGridIndex in dataForGrid) {
 				gridHTML += prepareTableCaption(dataGridIndex);
 				gridHTML += prepareTableHeader(dataForGrid[dataGridIndex].data.label);	
-				gridHTML += prepareRowOfTable(dataForGrid[dataGridIndex].data.value.length, dataForGrid[dataGridIndex].data.value[0].length, dataGridIndex);
+				gridHTML += prepareRowOfTable(attributes.pagination.dataPerPage, dataForGrid[dataGridIndex].data.value[0].length, dataGridIndex);
 				gridHTML += prepareTableFooter(dataGridIndex);
 			}
 			prepareDOM(gridHTML);
