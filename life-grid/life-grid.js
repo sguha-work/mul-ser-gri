@@ -123,7 +123,6 @@ var LifeGrid = (function() {
 	* @param searchText {String} - The text which will be searched
 	* @param dataGridIndex {Number} - The 0 based index of grid
 	* @param searchEntireData {Boolean} - If set then entire data will be searched rather than the displayed data
-	* @return {Boolean} - The table row html
 	*/
 	gridOperations.searchGrid = (function(searchText, dataGridIndex, searchEntireData) {
 		var dataFoundFlag;
@@ -152,6 +151,16 @@ var LifeGrid = (function() {
 				}
 			});
 		}	
+	});
+
+	/**
+	* @description - This function displays the specified page
+	* @param gridIndex {Number} - The index of the grid
+	* @param dataStartIndex {Number} - The 0 based index of grid
+	* @param dataEndIndex {Boolean} - If set then entire data will be searched rather than the displayed data
+	*/
+	gridOperations.moveToPage = (function(gridIndex, dataStartIndex, dataEndIndex){
+
 	});
 
 	/**
@@ -238,8 +247,8 @@ var LifeGrid = (function() {
 			if(pageIndex <= 5) {
 				pageNumberHTML += '<li><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
 			} else {
-				if(pageIndex == 6) {
-					pageNumberHTML += '<li><aclass="page-link"  title="More pages">......</a></li>';					
+				if((pageIndex % 6) == 0) {
+					pageNumberHTML += '<li><a class="page-link"  title="More pages">......</a></li>';					
 				}
 				pageNumberHTML += '<li style="display:none"><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
 			}
@@ -292,11 +301,15 @@ var LifeGrid = (function() {
 
 		// Attaching pagination event
 		jQuery(".db-pagination li a", gridContainer).on('click', function() {
-			var gridIndex;
+			var gridIndex,
+				dataStartIndex,
+				dataEndIndex;
+			
 			gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);
-			alert(gridIndex);
-			return false;
-			gridOperations.moveToPage
+			dataStartIndex = parseInt(jQuery(this).attr('data-start-index'));
+			dataEndIndex = parseInt(jQuery(this).attr('data-end-index'));
+
+			gridOperations.moveToPage(gridIndex, dataStartIndex, dataEndIndex);
 		});
 
 
