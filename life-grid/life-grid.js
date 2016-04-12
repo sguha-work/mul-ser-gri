@@ -123,7 +123,6 @@ var LifeGrid = (function() {
 	* @param searchText {String} - The text which will be searched
 	* @param dataGridIndex {Number} - The 0 based index of grid
 	* @param searchEntireData {Boolean} - If set then entire data will be searched rather than the displayed data
-	* @return {Boolean} - The table row html
 	*/
 	gridOperations.searchGrid = (function(searchText, dataGridIndex, searchEntireData) {
 		var dataFoundFlag;
@@ -152,6 +151,17 @@ var LifeGrid = (function() {
 				}
 			});
 		}	
+	});
+
+	/**
+	* @description - This function displays the specified page
+	* @param gridIndex {Number} - The index of the grid
+	* @param dataStartIndex {Number} - The 0 based index of grid
+	* @param dataEndIndex {Number} - If set then entire data will be searched rather than the displayed data
+	* @param pageNumber {Number} - If set then entire data will be searched rather than the displayed data
+	*/
+	gridOperations.moveToPage = (function(gridIndex, dataStartIndex, dataEndIndex, pageNumber){
+		setDataToCell(jQuery("table[data-grid-index='"+gridIndex+"']", gridContainer)[0], gridIndex, dataStartIndex, dataEndIndex, pageNumber);
 	});
 
 	/**
@@ -225,28 +235,35 @@ var LifeGrid = (function() {
 			dataStartIndex,
 			dataEndIndex,
 			firstIndexOfDisplayedData,
-			lastIndexOfDisplayedData;
+			lastIndexOfDisplayedData,
+			pageSetIndex,
+			pageNumberFontWeight;
 
 		// pagination calculation
 		totalNumberOfData = dataForGrid[gridIndex].data.value.length;
 		totalNumberOfPages = (totalNumberOfData<attributes.pagination.dataPerPage)?1:((totalNumberOfData % attributes.pagination.dataPerPage)?(Math.floor((totalNumberOfData / attributes.pagination.dataPerPage))+1):(Math.floor((totalNumberOfData / attributes.pagination.dataPerPage))));
 		pageNumberHTML = "";							
-		
+		pageSetIndex = 0;
 		for(pageIndex=1; pageIndex<=totalNumberOfPages; pageIndex++) {
 			dataStartIndex = ((pageIndex-1)*attributes.pagination.dataPerPage);
 			dataEndIndex = dataStartIndex +  attributes.pagination.dataPerPage -1;
-			if(pageIndex <= 5) {
-				pageNumberHTML += '<li><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
+			if(pageIndex == 1) {
+				pageNumberFontWeight = "bolder";
 			} else {
-				if(pageIndex == 6) {
-					pageNumberHTML += '<li><aclass="page-link"  title="More pages">......</a></li>';					
+				pageNumberFontWeight = "normal";
+			}
+			if(pageIndex <= 5) {
+				pageNumberHTML += '<li><a style="font-weight:'+pageNumberFontWeight+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
+			} else {
+				if((pageIndex % 6) == 0) {
+					pageNumberHTML += '<li><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages">......</a></li>';					
+					pageSetIndex += 1;
 				}
-				pageNumberHTML += '<li style="display:none"><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
+				pageNumberHTML += '<li style="display:none; font-weight:'+pageNumberFontWeight+'"><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
 			}
 		}
-
+		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages">......</a></li>';
 		
-
 		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label></label> - <label></label> of ' + totalNumberOfData + ' items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
 		return footerHTML;
 	});
@@ -274,7 +291,7 @@ var LifeGrid = (function() {
 	*/
 	startBindingEvents = (function() {
 		// Attaching search event
-		jQuery("input[value='Search']",gridContainer).on('click', function() {
+		jQuery("input[value='Search']", gridContainer).on('click', function() {
 			if(jQuery(this).prev().prev().prev().is(":checked")) {
 				gridOperations.searchGrid(jQuery.trim(jQuery(this).prev().val()), parseInt(jQuery(this).attr('data-grid-index')), 1);
 			} else {
@@ -282,7 +299,7 @@ var LifeGrid = (function() {
 			}
 		});
 		
-		jQuery("input[value='Search']",gridContainer).prev().on('change keyup paste', function() {
+		jQuery("input[value='Search']", gridContainer).prev().on('change keyup paste', function() {
 			if(jQuery(this).prev().prev().is(":checked")) {
 				gridOperations.searchGrid(jQuery.trim(jQuery(this).val()), parseInt(jQuery(this).next().attr('data-grid-index')), 1);
 			} else {
@@ -290,16 +307,58 @@ var LifeGrid = (function() {
 			}
 		});
 
+		// Attaching pagination event
+		jQuery(".db-pagination li a", gridContainer).on('click', function() {
+			var gridIndex,
+				dataStartIndex,
+				dataEndIndex,
+				pageNumber;
+			if(this.hasAttribute('data-page-set-index')) {
+				gridOperations.movePageSet(this);	
+			} else {
+				gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);
+				dataStartIndex = parseInt(jQuery(this).attr('data-start-index'));
+				dataEndIndex = parseInt(jQuery(this).attr('data-end-index'));
+				pageNumber = parseInt(jQuery(this).text());
+				jQuery("li a", jQuery(".db-pagination").eq(gridIndex)[0]).css({
+					"font-weight": "normal"
+				});
+				jQuery(this).css({
+					"font-weight": "bolder"
+				});
+				gridOperations.moveToPage(gridIndex, dataStartIndex, dataEndIndex, pageNumber);
+			}
+		});
+
 
 	});
 
-	setDataToCell = (function(tableDOM, dataGridIndex, startIndex, endIndex) {
+	/**
+	* @description - This function set data to grid cell
+	* @param tableDOM {DOM Object} - The table DOM where the data are going to be injected
+	* @param dataGridIndex {Number} - 0 based index of the grid
+	* @param startIndex {Number} - 0 based start index of data
+	* @param endIndex {Number} - 0 based end index of data
+	* @param pageNumber {Number} - Optional, 1 based end index of page number
+	*/
+	setDataToCell = (function(tableDOM, dataGridIndex, startIndex, endIndex, pageNumber) {
 		var dataRowIndex,
 			tr,
 			dataIndex,
 			dataHTML;
+		if(typeof pageNumber == "undefined") {
+			pageNumber = 1;
+		}	
 		for(dataRowIndex=startIndex; dataRowIndex<=endIndex; dataRowIndex++) {
-			tr = jQuery("tr",tableDOM).eq(dataRowIndex);
+			if(dataRowIndex>=attributes.pagination.dataPerPage) {
+				tr = jQuery("tr",tableDOM).eq(dataRowIndex - (attributes.pagination.dataPerPage * pageNumber));
+			} else {
+				tr = jQuery("tr",tableDOM).eq(dataRowIndex);	
+			}
+			
+			if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex] == "undefined") {
+				break;
+			}
 			for(dataIndex in dataForGrid[dataGridIndex].data.value[dataRowIndex]) {
 				dataHTML = "";
 				if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] == "object") {
@@ -313,6 +372,7 @@ var LifeGrid = (function() {
 				} else {
 					dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] + '</div>';
 				}
+				jQuery("div.cell-data", tr).eq(dataIndex).html("");
 				jQuery("div.cell-data", tr).eq(dataIndex).html(dataHTML);
 			}
 		}
@@ -350,8 +410,6 @@ var LifeGrid = (function() {
 		} else {
 			setDataToCell(tableDOM, dataGridIndex, startIndex, endIndex);
 		}
-
-		
 	});
 
 	/**
@@ -386,16 +444,17 @@ var LifeGrid = (function() {
 			dataGridIndex;
 
 		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
+			startAttachingAttribute();
 			gridHTML = prepareTableCaption(0);
 			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
 			gridHTML += prepareRowOfTable(attributes.pagination.dataPerPage, dataForGrid[0].data.value[0].length, 0);
 			gridHTML += prepareTableFooter(0);
 			prepareDOM(gridHTML);
-			startAttachingAttribute();
 			startBindingEvents();
 			startInjectingData(0, (attributes.pagination.dataPerPage-1), 0);
 
 		} else { // for multiseriese
+			startAttachingAttribute();
 			gridHTML = "";
 			for(dataGridIndex in dataForGrid) {
 				gridHTML += prepareTableCaption(dataGridIndex);
@@ -404,7 +463,6 @@ var LifeGrid = (function() {
 				gridHTML += prepareTableFooter(dataGridIndex);
 			}
 			prepareDOM(gridHTML);
-			startAttachingAttribute();
 			startBindingEvents();
 			for(dataGridIndex in dataForGrid) {
 				startInjectingData(0, (attributes.pagination.dataPerPage-1), dataGridIndex);
