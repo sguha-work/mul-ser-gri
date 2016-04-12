@@ -160,7 +160,7 @@ var LifeGrid = (function() {
 	* @param dataEndIndex {Boolean} - If set then entire data will be searched rather than the displayed data
 	*/
 	gridOperations.moveToPage = (function(gridIndex, dataStartIndex, dataEndIndex){
-
+		setDataToCell(jQuery("table[data-grid-index='"+gridIndex+"']", gridContainer)[0], gridIndex, dataStartIndex, dataEndIndex);
 	});
 
 	/**
@@ -234,28 +234,35 @@ var LifeGrid = (function() {
 			dataStartIndex,
 			dataEndIndex,
 			firstIndexOfDisplayedData,
-			lastIndexOfDisplayedData;
+			lastIndexOfDisplayedData,
+			pageSetIndex,
+			pageNumberFontWeight;
 
 		// pagination calculation
 		totalNumberOfData = dataForGrid[gridIndex].data.value.length;
 		totalNumberOfPages = (totalNumberOfData<attributes.pagination.dataPerPage)?1:((totalNumberOfData % attributes.pagination.dataPerPage)?(Math.floor((totalNumberOfData / attributes.pagination.dataPerPage))+1):(Math.floor((totalNumberOfData / attributes.pagination.dataPerPage))));
 		pageNumberHTML = "";							
-		
+		pageSetIndex = 0;
 		for(pageIndex=1; pageIndex<=totalNumberOfPages; pageIndex++) {
 			dataStartIndex = ((pageIndex-1)*attributes.pagination.dataPerPage);
 			dataEndIndex = dataStartIndex +  attributes.pagination.dataPerPage -1;
+			if(pageIndex == 1) {
+				pageNumberFontWeight = "bolder";
+			} else {
+				pageNumberFontWeight = "normal";
+			}
 			if(pageIndex <= 5) {
-				pageNumberHTML += '<li><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
+				pageNumberHTML += '<li><a style="font-weight:'+pageNumberFontWeight+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
 			} else {
 				if((pageIndex % 6) == 0) {
-					pageNumberHTML += '<li><a class="page-link"  title="More pages">......</a></li>';					
+					pageNumberHTML += '<li><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages">......</a></li>';					
+					pageSetIndex += 1;
 				}
-				pageNumberHTML += '<li style="display:none"><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
+				pageNumberHTML += '<li style="display:none; font-weight:'+pageNumberFontWeight+'"><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
 			}
 		}
-
+		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages">......</a></li>';
 		
-
 		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label></label> - <label></label> of ' + totalNumberOfData + ' items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
 		return footerHTML;
 	});
@@ -304,17 +311,32 @@ var LifeGrid = (function() {
 			var gridIndex,
 				dataStartIndex,
 				dataEndIndex;
-			
-			gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);
-			dataStartIndex = parseInt(jQuery(this).attr('data-start-index'));
-			dataEndIndex = parseInt(jQuery(this).attr('data-end-index'));
-
-			gridOperations.moveToPage(gridIndex, dataStartIndex, dataEndIndex);
+			if(this.hasAttribute('data-page-set-index')) {
+				gridOperations.movePageSet(this);	
+			} else {
+				gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);
+				dataStartIndex = parseInt(jQuery(this).attr('data-start-index'));
+				dataEndIndex = parseInt(jQuery(this).attr('data-end-index'));
+				jQuery("li a", jQuery(".db-pagination").eq(gridIndex)[0]).css({
+					"font-weight": "normal"
+				});
+				jQuery(this).css({
+					"font-weight": "bolder"
+				});
+				gridOperations.moveToPage(gridIndex, dataStartIndex, dataEndIndex);
+			}
 		});
 
 
 	});
 
+	/**
+	* @description - This function set data to grid cell
+	* @param tableDOM {DOM Object} - The table DOM where the data are going to be injected
+	* @param dataGridIndex {Number} - 0 based index of the grid
+	* @param startIndex {Number} - 0 based start index of data
+	* @param endIndex {Number} - 0 based end index of data
+	*/
 	setDataToCell = (function(tableDOM, dataGridIndex, startIndex, endIndex) {
 		var dataRowIndex,
 			tr,
@@ -375,8 +397,6 @@ var LifeGrid = (function() {
 		} else {
 			setDataToCell(tableDOM, dataGridIndex, startIndex, endIndex);
 		}
-
-		
 	});
 
 	/**
