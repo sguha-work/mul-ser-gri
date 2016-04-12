@@ -274,7 +274,7 @@ var LifeGrid = (function() {
 	*/
 	startBindingEvents = (function() {
 		// Attaching search event
-		jQuery("input[value='Search']",gridContainer).on('click', function() {
+		jQuery("input[value='Search']", gridContainer).on('click', function() {
 			if(jQuery(this).prev().prev().prev().is(":checked")) {
 				gridOperations.searchGrid(jQuery.trim(jQuery(this).prev().val()), parseInt(jQuery(this).attr('data-grid-index')), 1);
 			} else {
@@ -282,12 +282,21 @@ var LifeGrid = (function() {
 			}
 		});
 		
-		jQuery("input[value='Search']",gridContainer).prev().on('change keyup paste', function() {
+		jQuery("input[value='Search']", gridContainer).prev().on('change keyup paste', function() {
 			if(jQuery(this).prev().prev().is(":checked")) {
 				gridOperations.searchGrid(jQuery.trim(jQuery(this).val()), parseInt(jQuery(this).next().attr('data-grid-index')), 1);
 			} else {
 				gridOperations.searchGrid(jQuery.trim(jQuery(this).val()), parseInt(jQuery(this).next().attr('data-grid-index')), 0);	
 			}
+		});
+
+		// Attaching pagination event
+		jQuery(".db-pagination li a", gridContainer).on('click', function() {
+			var gridIndex;
+			gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);
+			alert(gridIndex);
+			return false;
+			gridOperations.moveToPage
 		});
 
 
@@ -300,6 +309,9 @@ var LifeGrid = (function() {
 			dataHTML;
 		for(dataRowIndex=startIndex; dataRowIndex<=endIndex; dataRowIndex++) {
 			tr = jQuery("tr",tableDOM).eq(dataRowIndex);
+			if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex] == "undefined") {
+				break;
+			}
 			for(dataIndex in dataForGrid[dataGridIndex].data.value[dataRowIndex]) {
 				dataHTML = "";
 				if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] == "object") {
@@ -386,16 +398,17 @@ var LifeGrid = (function() {
 			dataGridIndex;
 
 		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
+			startAttachingAttribute();
 			gridHTML = prepareTableCaption(0);
 			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
 			gridHTML += prepareRowOfTable(attributes.pagination.dataPerPage, dataForGrid[0].data.value[0].length, 0);
 			gridHTML += prepareTableFooter(0);
 			prepareDOM(gridHTML);
-			startAttachingAttribute();
 			startBindingEvents();
 			startInjectingData(0, (attributes.pagination.dataPerPage-1), 0);
 
 		} else { // for multiseriese
+			startAttachingAttribute();
 			gridHTML = "";
 			for(dataGridIndex in dataForGrid) {
 				gridHTML += prepareTableCaption(dataGridIndex);
@@ -404,7 +417,6 @@ var LifeGrid = (function() {
 				gridHTML += prepareTableFooter(dataGridIndex);
 			}
 			prepareDOM(gridHTML);
-			startAttachingAttribute();
 			startBindingEvents();
 			for(dataGridIndex in dataForGrid) {
 				startInjectingData(0, (attributes.pagination.dataPerPage-1), dataGridIndex);
