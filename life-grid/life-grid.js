@@ -157,10 +157,11 @@ var LifeGrid = (function() {
 	* @description - This function displays the specified page
 	* @param gridIndex {Number} - The index of the grid
 	* @param dataStartIndex {Number} - The 0 based index of grid
-	* @param dataEndIndex {Boolean} - If set then entire data will be searched rather than the displayed data
+	* @param dataEndIndex {Number} - If set then entire data will be searched rather than the displayed data
+	* @param pageNumber {Number} - If set then entire data will be searched rather than the displayed data
 	*/
-	gridOperations.moveToPage = (function(gridIndex, dataStartIndex, dataEndIndex){
-		setDataToCell(jQuery("table[data-grid-index='"+gridIndex+"']", gridContainer)[0], gridIndex, dataStartIndex, dataEndIndex);
+	gridOperations.moveToPage = (function(gridIndex, dataStartIndex, dataEndIndex, pageNumber){
+		setDataToCell(jQuery("table[data-grid-index='"+gridIndex+"']", gridContainer)[0], gridIndex, dataStartIndex, dataEndIndex, pageNumber);
 	});
 
 	/**
@@ -310,20 +311,22 @@ var LifeGrid = (function() {
 		jQuery(".db-pagination li a", gridContainer).on('click', function() {
 			var gridIndex,
 				dataStartIndex,
-				dataEndIndex;
+				dataEndIndex,
+				pageNumber;
 			if(this.hasAttribute('data-page-set-index')) {
 				gridOperations.movePageSet(this);	
 			} else {
 				gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);
 				dataStartIndex = parseInt(jQuery(this).attr('data-start-index'));
 				dataEndIndex = parseInt(jQuery(this).attr('data-end-index'));
+				pageNumber = parseInt(jQuery(this).text());
 				jQuery("li a", jQuery(".db-pagination").eq(gridIndex)[0]).css({
 					"font-weight": "normal"
 				});
 				jQuery(this).css({
 					"font-weight": "bolder"
 				});
-				gridOperations.moveToPage(gridIndex, dataStartIndex, dataEndIndex);
+				gridOperations.moveToPage(gridIndex, dataStartIndex, dataEndIndex, pageNumber);
 			}
 		});
 
@@ -336,14 +339,23 @@ var LifeGrid = (function() {
 	* @param dataGridIndex {Number} - 0 based index of the grid
 	* @param startIndex {Number} - 0 based start index of data
 	* @param endIndex {Number} - 0 based end index of data
+	* @param pageNumber {Number} - Optional, 1 based end index of page number
 	*/
-	setDataToCell = (function(tableDOM, dataGridIndex, startIndex, endIndex) {
+	setDataToCell = (function(tableDOM, dataGridIndex, startIndex, endIndex, pageNumber) {
 		var dataRowIndex,
 			tr,
 			dataIndex,
 			dataHTML;
+		if(typeof pageNumber == "undefined") {
+			pageNumber = 1;
+		}	
 		for(dataRowIndex=startIndex; dataRowIndex<=endIndex; dataRowIndex++) {
-			tr = jQuery("tr",tableDOM).eq(dataRowIndex);
+			if(dataRowIndex>=attributes.pagination.dataPerPage) {
+				tr = jQuery("tr",tableDOM).eq(dataRowIndex - (attributes.pagination.dataPerPage * pageNumber));
+			} else {
+				tr = jQuery("tr",tableDOM).eq(dataRowIndex);	
+			}
+			
 			if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex] == "undefined") {
 				break;
 			}
@@ -360,6 +372,7 @@ var LifeGrid = (function() {
 				} else {
 					dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] + '</div>';
 				}
+				jQuery("div.cell-data", tr).eq(dataIndex).html("");
 				jQuery("div.cell-data", tr).eq(dataIndex).html(dataHTML);
 			}
 		}
