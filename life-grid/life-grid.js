@@ -420,8 +420,7 @@ var LifeGrid = (function() {
 			presentPageNumberDOM = jQuery("a[data-is-current-page='true']",presentPaginationDOM)[0];
 			presentPageNumber = parseInt(jQuery(presentPageNumberDOM).text());
 			nextPageNumberDOM = jQuery("li a[data-page-index='"+(presentPageNumber+1)+"']", presentPaginationDOM)[0];
-			
-			if(parseInt(jQuery(nextPageNumberDOM).attr('data-page-index')) > 5) {
+			if(jQuery("a",jQuery(presentPageNumberDOM).parent().next()[0])[0].hasAttribute("data-move-set-direction")) {
 				jQuery("a",jQuery(presentPageNumberDOM).parent().next()[0]).trigger('click');
 			}
 			jQuery(nextPageNumberDOM).trigger("click");
@@ -440,7 +439,9 @@ var LifeGrid = (function() {
 			presentPageNumberDOM = jQuery("a[data-is-current-page='true']",presentPaginationDOM)[0];
 			presentPageNumber = parseInt(jQuery(presentPageNumberDOM).text());
 			previousPageNumberDOM = jQuery("li a[data-page-index='"+(presentPageNumber-1)+"']", presentPaginationDOM)[0];
-
+			if(jQuery("a",jQuery(presentPageNumberDOM).parent().prev()[0])[0].hasAttribute("data-move-set-direction")) {
+				jQuery("a",jQuery(presentPageNumberDOM).parent().prev()[0]).trigger('click');
+			}
 			jQuery(previousPageNumberDOM).trigger("click");
 		});
 
