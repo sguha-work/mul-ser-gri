@@ -179,10 +179,9 @@ var LifeGrid = (function() {
 		paginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0]; 	
 		moveSetDirection = jQuery(pageSetDOM).attr('data-move-set-direction');
 		lengthOfPaginationLI = jQuery("li", paginationDOM).length;
+		indexOfPresentPageSetDOM = jQuery("li a", paginationDOM).index(pageSetDOM);
 		if(moveSetDirection == "r") {
 			jQuery(pageSetDOM).attr('data-move-set-direction', "l");
-			indexOfPresentPageSetDOM = jQuery("li a", paginationDOM).index(pageSetDOM);
-			//indexOfPreviousPageSetDOM = indexOfPresentPageSetDOM - 6;
 			indexOfNextPageSetDOM = indexOfPresentPageSetDOM + 6;
 			jQuery("li a", paginationDOM).each(function(index) {
 				if(index<indexOfPresentPageSetDOM) {
@@ -195,6 +194,14 @@ var LifeGrid = (function() {
 			});
 		} else {
 			jQuery(pageSetDOM).attr('data-move-set-direction', "r");
+			indexOfPreviousPageSetDOM = indexOfPresentPageSetDOM - 6;
+			jQuery("li a", paginationDOM).each(function(index) {
+				if(index>=(indexOfPreviousPageSetDOM-1) && index<=indexOfPresentPageSetDOM) {
+					jQuery(this).parent().show();
+				} else {
+					jQuery(this).parent().hide();
+				}
+			});
 		}
 	});
 
