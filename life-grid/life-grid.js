@@ -163,6 +163,14 @@ var LifeGrid = (function() {
 	gridOperations.moveToPage = (function(gridIndex, dataStartIndex, dataEndIndex, pageNumber){
 		var pageInfoDOM;
 		setDataToCell(jQuery("table[data-grid-index='"+gridIndex+"']", gridContainer)[0], gridIndex, dataStartIndex, dataEndIndex, pageNumber);
+
+		if(typeof startIndexOfDisplayedData == "undefined") {
+			startIndexOfDisplayedData = [];
+		}
+		if(typeof endIndexOfDisplayedData == "undefined") {
+			endIndexOfDisplayedData = [];
+		}
+		
 		// updating page info
 		pageInfoDOM = jQuery(".db-page-info", gridContainer).eq(gridIndex);
 		jQuery("label", pageInfoDOM).eq(0).text((dataStartIndex+1));
@@ -170,6 +178,10 @@ var LifeGrid = (function() {
 			dataEndIndex = dataForGrid[gridIndex].data.value.length-1;
 		}
 		jQuery("label", pageInfoDOM).eq(1).text((dataEndIndex+1));
+
+		// setting up the displayed data indexes
+		startIndexOfDisplayedData[gridIndex] = dataStartIndex;
+		endIndexOfDisplayedData[gridIndex] = dataEndIndex;
 
 	});
 
@@ -288,6 +300,7 @@ var LifeGrid = (function() {
 			lastIndexOfDisplayedData,
 			pageSetIndex,
 			pageNumberFontWeight,
+			currentPageFlag,// required to identify the current page
 			pageSetIndexFlag; // requirred to hide page set index greater than 1
 
 		// pagination calculation
@@ -301,11 +314,13 @@ var LifeGrid = (function() {
 			dataEndIndex = dataStartIndex +  attributes.pagination.dataPerPage -1;
 			if(pageIndex == 1) {
 				pageNumberFontWeight = "bolder";
+				currentPageFlag = "true";
 			} else {
 				pageNumberFontWeight = "normal";
+				currentPageFlag = false;
 			}
 			if(pageIndex <= 5) {
-				pageNumberHTML += '<li><a style="font-weight:'+pageNumberFontWeight+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
+				pageNumberHTML += '<li><a data-is-current-page="'+currentPageFlag+'" style="font-weight:'+pageNumberFontWeight+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
 			} else {
 				if((pageIndex % 6) == 0) {
 					if(!pageSetIndexFlag) {
@@ -316,7 +331,7 @@ var LifeGrid = (function() {
 					}
 					pageSetIndex += 1;
 				}
-				pageNumberHTML += '<li style="display:none; font-weight:'+pageNumberFontWeight+'"><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
+				pageNumberHTML += '<li style="display:none; font-weight:'+pageNumberFontWeight+'"><a data-is-current-page="'+currentPageFlag+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
 			}
 		}
 		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';
@@ -380,13 +395,54 @@ var LifeGrid = (function() {
 				jQuery("li a", jQuery(".db-pagination").eq(gridIndex)[0]).css({
 					"font-weight": "normal"
 				});
+				jQuery("li a", jQuery(".db-pagination").eq(gridIndex)[0]).attr("data-is-current-page", "false");
+				
 				jQuery(this).css({
 					"font-weight": "bolder"
 				});
+				jQuery(this).attr("data-is-current-page", "true");
 				gridOperations.moveToPage(gridIndex, dataStartIndex, dataEndIndex, pageNumber);
 			}
 		});
 
+		// move to next page
+		jQuery(".db-icon-left-arrow-next", gridContainer).on('click', function(){
+			var presentPageNumber,
+				gridIndex,
+				presentPaginationDOM,
+				dataStartIndex,
+				dataEndIndex,
+				presentPageNumberDOM,
+				nextPageNumberDOM;
+
+			gridIndex = jQuery(".db-icon-left-arrow-next", gridContainer).index(jQuery(this));			
+			presentPaginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0];
+			presentPageNumberDOM = jQuery("a[data-is-current-page='true']",presentPaginationDOM)[0];
+			presentPageNumber = parseInt(jQuery(presentPageNumberDOM).text());
+			nextPageNumberDOM = jQuery("li a[data-page-index='"+(presentPageNumber+1)+"']", presentPaginationDOM)[0];
+			
+			if(parseInt(jQuery(nextPageNumberDOM).attr('data-page-index')) > 5) {
+				jQuery("a",jQuery(presentPageNumberDOM).parent().next()[0]).trigger('click');
+			}
+			jQuery(nextPageNumberDOM).trigger("click");
+		});
+
+		// move to previous page
+		jQuery(".db-icon-left-arrow-previous", gridContainer).on('click', function(){
+			var gridIndex,
+				presentPaginationDOM,
+				presentPageNumber,
+				presentPageNumberDOM,
+				previousPageNumberDOM;
+
+			gridIndex = jQuery(".db-icon-left-arrow-previous", gridContainer).index(jQuery(this));
+			presentPaginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0];
+			presentPageNumberDOM = jQuery("a[data-is-current-page='true']",presentPaginationDOM)[0];
+			presentPageNumber = parseInt(jQuery(presentPageNumberDOM).text());
+			previousPageNumberDOM = jQuery("li a[data-page-index='"+(presentPageNumber-1)+"']", presentPaginationDOM)[0];
+
+			jQuery(previousPageNumberDOM).trigger("click");
+		});
 
 	});
 
