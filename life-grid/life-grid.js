@@ -165,6 +165,20 @@ var LifeGrid = (function() {
 	});
 
 	/**
+	* @description - This function controls the page set display
+	* @param pageSetDOM {DOM Object} - The DOM object
+	*/
+	gridOperations.movePageSet = (function(pageSetDOM) {
+		var moveSetDirection;
+		moveSetDirection = jQuery(pageSetDOM).attr('data-move-set-direction');
+		if(moveSetDirection == "r") {
+			jQuery(pageSetDOM).attr('data-move-set-direction', "l");
+		} else {
+			jQuery(pageSetDOM).attr('data-move-set-direction', "r");
+		}
+	});
+
+	/**
 	* @description - This function prepare rows for data
 	* @param numberOfRows {Number} - Number of rows
 	* @param numberOfColoumns {Number} - Number of columns
@@ -256,13 +270,13 @@ var LifeGrid = (function() {
 				pageNumberHTML += '<li><a style="font-weight:'+pageNumberFontWeight+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
 			} else {
 				if((pageIndex % 6) == 0) {
-					pageNumberHTML += '<li><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages">......</a></li>';					
+					pageNumberHTML += '<li><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';					
 					pageSetIndex += 1;
 				}
 				pageNumberHTML += '<li style="display:none; font-weight:'+pageNumberFontWeight+'"><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
 			}
 		}
-		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages">......</a></li>';
+		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';
 		
 		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label></label> - <label></label> of ' + totalNumberOfData + ' items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
 		return footerHTML;
