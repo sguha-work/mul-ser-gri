@@ -182,7 +182,7 @@ var LifeGrid = (function() {
 		// setting up the displayed data indexes
 		startIndexOfDisplayedData[gridIndex] = dataStartIndex;
 		endIndexOfDisplayedData[gridIndex] = dataEndIndex;
-		
+
 	});
 
 	/**
@@ -300,6 +300,7 @@ var LifeGrid = (function() {
 			lastIndexOfDisplayedData,
 			pageSetIndex,
 			pageNumberFontWeight,
+			currentPageFlag,// required to identify the current page
 			pageSetIndexFlag; // requirred to hide page set index greater than 1
 
 		// pagination calculation
@@ -313,11 +314,13 @@ var LifeGrid = (function() {
 			dataEndIndex = dataStartIndex +  attributes.pagination.dataPerPage -1;
 			if(pageIndex == 1) {
 				pageNumberFontWeight = "bolder";
+				currentPageFlag = "true";
 			} else {
 				pageNumberFontWeight = "normal";
+				currentPageFlag = false;
 			}
 			if(pageIndex <= 5) {
-				pageNumberHTML += '<li><a style="font-weight:'+pageNumberFontWeight+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
+				pageNumberHTML += '<li><a data-is-current-page="'+currentPageFlag+'" style="font-weight:'+pageNumberFontWeight+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
 			} else {
 				if((pageIndex % 6) == 0) {
 					if(!pageSetIndexFlag) {
@@ -328,7 +331,7 @@ var LifeGrid = (function() {
 					}
 					pageSetIndex += 1;
 				}
-				pageNumberHTML += '<li style="display:none; font-weight:'+pageNumberFontWeight+'"><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
+				pageNumberHTML += '<li style="display:none; font-weight:'+pageNumberFontWeight+'"><a data-is-current-page="'+currentPageFlag+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
 			}
 		}
 		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';
@@ -392,9 +395,12 @@ var LifeGrid = (function() {
 				jQuery("li a", jQuery(".db-pagination").eq(gridIndex)[0]).css({
 					"font-weight": "normal"
 				});
+				jQuery("li a", jQuery(".db-pagination").eq(gridIndex)[0]).attr("data-is-current-page", "false");
+				
 				jQuery(this).css({
 					"font-weight": "bolder"
 				});
+				jQuery(this).attr("data-is-current-page", "true");
 				gridOperations.moveToPage(gridIndex, dataStartIndex, dataEndIndex, pageNumber);
 			}
 		});
