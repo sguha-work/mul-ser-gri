@@ -167,12 +167,31 @@ var LifeGrid = (function() {
 	/**
 	* @description - This function controls the page set display
 	* @param pageSetDOM {DOM Object} - The DOM object
+	* @param gridIndex {Number} - 0 based index of the grid
 	*/
-	gridOperations.movePageSet = (function(pageSetDOM) {
-		var moveSetDirection;
+	gridOperations.movePageSet = (function(pageSetDOM, gridIndex) {
+		var moveSetDirection,
+			indexOfPresentPageSetDOM,
+			indexOfPreviousPageSetDOM,
+			indexOfNextPageSetDOM,
+			paginationDOM;
+		paginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0]; 	
 		moveSetDirection = jQuery(pageSetDOM).attr('data-move-set-direction');
 		if(moveSetDirection == "r") {
 			jQuery(pageSetDOM).attr('data-move-set-direction', "l");
+			indexOfPresentPageSetDOM = jQuery("li a", paginationDOM).index(pageSetDOM);
+			indexOfPreviousPageSetDOM = indexOfPresentPageSetDOM - 6;
+			indexOfNextPageSetDOM = indexOfPresentPageSetDOM + 6;
+			console.log(indexOfPreviousPageSetDOM + " " + indexOfPresentPageSetDOM + " " + indexOfNextPageSetDOM);
+			jQuery("li a", paginationDOM).each(function(index) {
+				if(index<indexOfPresentPageSetDOM) {
+					jQuery(this).parent().hide();
+				} else if(index>=indexOfPresentPageSetDOM && index<=(indexOfNextPageSetDOM+1)) {
+					jQuery(this).parent().show();console.log(index);
+				} else {
+					return false;
+				}
+			});
 		} else {
 			jQuery(pageSetDOM).attr('data-move-set-direction', "r");
 		}
@@ -251,13 +270,15 @@ var LifeGrid = (function() {
 			firstIndexOfDisplayedData,
 			lastIndexOfDisplayedData,
 			pageSetIndex,
-			pageNumberFontWeight;
+			pageNumberFontWeight,
+			pageSetIndexFlag; // requirred to hide page set index greater than 1
 
 		// pagination calculation
 		totalNumberOfData = dataForGrid[gridIndex].data.value.length;
 		totalNumberOfPages = (totalNumberOfData<attributes.pagination.dataPerPage)?1:((totalNumberOfData % attributes.pagination.dataPerPage)?(Math.floor((totalNumberOfData / attributes.pagination.dataPerPage))+1):(Math.floor((totalNumberOfData / attributes.pagination.dataPerPage))));
 		pageNumberHTML = "";							
 		pageSetIndex = 0;
+		pageSetIndexFlag = 0;
 		for(pageIndex=1; pageIndex<=totalNumberOfPages; pageIndex++) {
 			dataStartIndex = ((pageIndex-1)*attributes.pagination.dataPerPage);
 			dataEndIndex = dataStartIndex +  attributes.pagination.dataPerPage -1;
@@ -270,7 +291,12 @@ var LifeGrid = (function() {
 				pageNumberHTML += '<li><a style="font-weight:'+pageNumberFontWeight+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
 			} else {
 				if((pageIndex % 6) == 0) {
-					pageNumberHTML += '<li><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';					
+					if(!pageSetIndexFlag) {
+						pageNumberHTML += '<li><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';					
+						pageSetIndexFlag = 1;
+					} else {
+						pageNumberHTML += '<li style="display:none"><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';						
+					}
 					pageSetIndex += 1;
 				}
 				pageNumberHTML += '<li style="display:none; font-weight:'+pageNumberFontWeight+'"><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
@@ -327,10 +353,10 @@ var LifeGrid = (function() {
 				dataStartIndex,
 				dataEndIndex,
 				pageNumber;
+			gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);	
 			if(this.hasAttribute('data-page-set-index')) {
-				gridOperations.movePageSet(this);	
+				gridOperations.movePageSet(this, gridIndex);	
 			} else {
-				gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);
 				dataStartIndex = parseInt(jQuery(this).attr('data-start-index'));
 				dataEndIndex = parseInt(jQuery(this).attr('data-end-index'));
 				pageNumber = parseInt(jQuery(this).text());
