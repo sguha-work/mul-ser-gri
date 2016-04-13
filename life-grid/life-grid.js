@@ -405,6 +405,44 @@ var LifeGrid = (function() {
 			}
 		});
 
+		// move to next page
+		jQuery(".db-icon-left-arrow-next", gridContainer).on('click', function(){
+			var presentPageNumber,
+				gridIndex,
+				presentPaginationDOM,
+				dataStartIndex,
+				dataEndIndex,
+				presentPageNumberDOM,
+				nextPageNumberDOM;
+
+			gridIndex = jQuery(".db-icon-left-arrow-next", gridContainer).index(jQuery(this));			
+			presentPaginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0];
+			presentPageNumberDOM = jQuery("a[data-is-current-page='true']",presentPaginationDOM)[0];
+			presentPageNumber = parseInt(jQuery(presentPageNumberDOM).text());
+			nextPageNumberDOM = jQuery("li a[data-page-index='"+(presentPageNumber+1)+"']", presentPaginationDOM)[0];
+			
+			if(parseInt(jQuery(nextPageNumberDOM).attr('data-page-index')) > 5) {
+				jQuery("a",jQuery(presentPageNumberDOM).parent().next()[0]).trigger('click');
+			}
+			jQuery(nextPageNumberDOM).trigger("click");
+		});
+
+		// move to previous page
+		jQuery(".db-icon-left-arrow-previous", gridContainer).on('click', function(){
+			var gridIndex,
+				presentPaginationDOM,
+				presentPageNumber,
+				presentPageNumberDOM,
+				previousPageNumberDOM;
+
+			gridIndex = jQuery(".db-icon-left-arrow-previous", gridContainer).index(jQuery(this));
+			presentPaginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0];
+			presentPageNumberDOM = jQuery("a[data-is-current-page='true']",presentPaginationDOM)[0];
+			presentPageNumber = parseInt(jQuery(presentPageNumberDOM).text());
+			previousPageNumberDOM = jQuery("li a[data-page-index='"+(presentPageNumber-1)+"']", presentPaginationDOM)[0];
+
+			jQuery(previousPageNumberDOM).trigger("click");
+		});
 
 	});
 
