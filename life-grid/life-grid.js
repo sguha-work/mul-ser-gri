@@ -163,6 +163,14 @@ var LifeGrid = (function() {
 	gridOperations.moveToPage = (function(gridIndex, dataStartIndex, dataEndIndex, pageNumber){
 		var pageInfoDOM;
 		setDataToCell(jQuery("table[data-grid-index='"+gridIndex+"']", gridContainer)[0], gridIndex, dataStartIndex, dataEndIndex, pageNumber);
+
+		if(typeof startIndexOfDisplayedData == "undefined") {
+			startIndexOfDisplayedData = [];
+		}
+		if(typeof endIndexOfDisplayedData == "undefined") {
+			endIndexOfDisplayedData = [];
+		}
+		
 		// updating page info
 		pageInfoDOM = jQuery(".db-page-info", gridContainer).eq(gridIndex);
 		jQuery("label", pageInfoDOM).eq(0).text((dataStartIndex+1));
@@ -171,6 +179,10 @@ var LifeGrid = (function() {
 		}
 		jQuery("label", pageInfoDOM).eq(1).text((dataEndIndex+1));
 
+		// setting up the displayed data indexes
+		startIndexOfDisplayedData[gridIndex] = dataStartIndex;
+		endIndexOfDisplayedData[gridIndex] = dataEndIndex;
+		
 	});
 
 	/**
