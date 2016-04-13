@@ -161,7 +161,16 @@ var LifeGrid = (function() {
 	* @param pageNumber {Number} - If set then entire data will be searched rather than the displayed data
 	*/
 	gridOperations.moveToPage = (function(gridIndex, dataStartIndex, dataEndIndex, pageNumber){
+		var pageInfoDOM;
 		setDataToCell(jQuery("table[data-grid-index='"+gridIndex+"']", gridContainer)[0], gridIndex, dataStartIndex, dataEndIndex, pageNumber);
+		// updating page info
+		pageInfoDOM = jQuery(".db-page-info", gridContainer).eq(gridIndex);
+		jQuery("label", pageInfoDOM).eq(0).text((dataStartIndex+1));
+		if(dataEndIndex>dataForGrid[gridIndex].data.value.length-1) {
+			dataEndIndex = dataForGrid[gridIndex].data.value.length-1;
+		}
+		jQuery("label", pageInfoDOM).eq(1).text((dataEndIndex+1));
+
 	});
 
 	/**
@@ -405,23 +414,24 @@ var LifeGrid = (function() {
 			}
 			
 			if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex] == "undefined") {
-				break;
-			}
-			for(dataIndex in dataForGrid[dataGridIndex].data.value[dataRowIndex]) {
-				dataHTML = "";
-				if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] == "object") {
-					if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] != "undefined") {
-						dataHTML += '<div class="customer-img"><img src="' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] + '" width="" height="" alt="Indranil"></div>';
+				jQuery("div.cell-data", tr).html("");
+			} else {
+				for(dataIndex in dataForGrid[dataGridIndex].data.value[dataRowIndex]) {
+					dataHTML = "";
+					if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] == "object") {
+						if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] != "undefined") {
+							dataHTML += '<div class="customer-img"><img src="' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] + '" width="" height="" alt="Indranil"></div>';
+						}
+						if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] != "undefined") {
+							dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] + '</div>';
+						}
+						
+					} else {
+						dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] + '</div>';
 					}
-					if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] != "undefined") {
-						dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] + '</div>';
-					}
-					
-				} else {
-					dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] + '</div>';
+					jQuery("div.cell-data", tr).eq(dataIndex).html("");
+					jQuery("div.cell-data", tr).eq(dataIndex).html(dataHTML);
 				}
-				jQuery("div.cell-data", tr).eq(dataIndex).html("");
-				jQuery("div.cell-data", tr).eq(dataIndex).html(dataHTML);
 			}
 		}
 
