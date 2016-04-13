@@ -174,20 +174,21 @@ var LifeGrid = (function() {
 			indexOfPresentPageSetDOM,
 			indexOfPreviousPageSetDOM,
 			indexOfNextPageSetDOM,
-			paginationDOM;
+			paginationDOM,
+			lengthOfPaginationLI;
 		paginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0]; 	
 		moveSetDirection = jQuery(pageSetDOM).attr('data-move-set-direction');
+		lengthOfPaginationLI = jQuery("li", paginationDOM).length;
 		if(moveSetDirection == "r") {
 			jQuery(pageSetDOM).attr('data-move-set-direction', "l");
 			indexOfPresentPageSetDOM = jQuery("li a", paginationDOM).index(pageSetDOM);
-			indexOfPreviousPageSetDOM = indexOfPresentPageSetDOM - 6;
+			//indexOfPreviousPageSetDOM = indexOfPresentPageSetDOM - 6;
 			indexOfNextPageSetDOM = indexOfPresentPageSetDOM + 6;
-			console.log(indexOfPreviousPageSetDOM + " " + indexOfPresentPageSetDOM + " " + indexOfNextPageSetDOM);
 			jQuery("li a", paginationDOM).each(function(index) {
 				if(index<indexOfPresentPageSetDOM) {
 					jQuery(this).parent().hide();
-				} else if(index>=indexOfPresentPageSetDOM && index<=(indexOfNextPageSetDOM+1)) {
-					jQuery(this).parent().show();console.log(index);
+				} else if(index>=indexOfPresentPageSetDOM && index<=(indexOfNextPageSetDOM+1) && index != (lengthOfPaginationLI-1)) {
+					jQuery(this).parent().show();
 				} else {
 					return false;
 				}
