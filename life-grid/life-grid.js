@@ -161,7 +161,57 @@ var LifeGrid = (function() {
 	* @param pageNumber {Number} - If set then entire data will be searched rather than the displayed data
 	*/
 	gridOperations.moveToPage = (function(gridIndex, dataStartIndex, dataEndIndex, pageNumber){
+		var pageInfoDOM;
 		setDataToCell(jQuery("table[data-grid-index='"+gridIndex+"']", gridContainer)[0], gridIndex, dataStartIndex, dataEndIndex, pageNumber);
+		// updating page info
+		pageInfoDOM = jQuery(".db-page-info", gridContainer).eq(gridIndex);
+		jQuery("label", pageInfoDOM).eq(0).text((dataStartIndex+1));
+		if(dataEndIndex>dataForGrid[gridIndex].data.value.length-1) {
+			dataEndIndex = dataForGrid[gridIndex].data.value.length-1;
+		}
+		jQuery("label", pageInfoDOM).eq(1).text((dataEndIndex+1));
+
+	});
+
+	/**
+	* @description - This function controls the page set display
+	* @param pageSetDOM {DOM Object} - The DOM object
+	* @param gridIndex {Number} - 0 based index of the grid
+	*/
+	gridOperations.movePageSet = (function(pageSetDOM, gridIndex) {
+		var moveSetDirection,
+			indexOfPresentPageSetDOM,
+			indexOfPreviousPageSetDOM,
+			indexOfNextPageSetDOM,
+			paginationDOM,
+			lengthOfPaginationLI;
+		paginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0]; 	
+		moveSetDirection = jQuery(pageSetDOM).attr('data-move-set-direction');
+		lengthOfPaginationLI = jQuery("li", paginationDOM).length;
+		indexOfPresentPageSetDOM = jQuery("li a", paginationDOM).index(pageSetDOM);
+		if(moveSetDirection == "r") {
+			jQuery(pageSetDOM).attr('data-move-set-direction', "l");
+			indexOfNextPageSetDOM = indexOfPresentPageSetDOM + 6;
+			jQuery("li a", paginationDOM).each(function(index) {
+				if(index<indexOfPresentPageSetDOM) {
+					jQuery(this).parent().hide();
+				} else if(index>=indexOfPresentPageSetDOM && index<=(indexOfNextPageSetDOM+1) && index != (lengthOfPaginationLI-1)) {
+					jQuery(this).parent().show();
+				} else {
+					return false;
+				}
+			});
+		} else {
+			jQuery(pageSetDOM).attr('data-move-set-direction', "r");
+			indexOfPreviousPageSetDOM = indexOfPresentPageSetDOM - 6;
+			jQuery("li a", paginationDOM).each(function(index) {
+				if(index>=(indexOfPreviousPageSetDOM-1) && index<=indexOfPresentPageSetDOM) {
+					jQuery(this).parent().show();
+				} else {
+					jQuery(this).parent().hide();
+				}
+			});
+		}
 	});
 
 	/**
@@ -237,13 +287,15 @@ var LifeGrid = (function() {
 			firstIndexOfDisplayedData,
 			lastIndexOfDisplayedData,
 			pageSetIndex,
-			pageNumberFontWeight;
+			pageNumberFontWeight,
+			pageSetIndexFlag; // requirred to hide page set index greater than 1
 
 		// pagination calculation
 		totalNumberOfData = dataForGrid[gridIndex].data.value.length;
 		totalNumberOfPages = (totalNumberOfData<attributes.pagination.dataPerPage)?1:((totalNumberOfData % attributes.pagination.dataPerPage)?(Math.floor((totalNumberOfData / attributes.pagination.dataPerPage))+1):(Math.floor((totalNumberOfData / attributes.pagination.dataPerPage))));
 		pageNumberHTML = "";							
 		pageSetIndex = 0;
+		pageSetIndexFlag = 0;
 		for(pageIndex=1; pageIndex<=totalNumberOfPages; pageIndex++) {
 			dataStartIndex = ((pageIndex-1)*attributes.pagination.dataPerPage);
 			dataEndIndex = dataStartIndex +  attributes.pagination.dataPerPage -1;
@@ -256,13 +308,18 @@ var LifeGrid = (function() {
 				pageNumberHTML += '<li><a style="font-weight:'+pageNumberFontWeight+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
 			} else {
 				if((pageIndex % 6) == 0) {
-					pageNumberHTML += '<li><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages">......</a></li>';					
+					if(!pageSetIndexFlag) {
+						pageNumberHTML += '<li><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';					
+						pageSetIndexFlag = 1;
+					} else {
+						pageNumberHTML += '<li style="display:none"><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';						
+					}
 					pageSetIndex += 1;
 				}
 				pageNumberHTML += '<li style="display:none; font-weight:'+pageNumberFontWeight+'"><a data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
 			}
 		}
-		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages">......</a></li>';
+		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';
 		
 		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label></label> - <label></label> of ' + totalNumberOfData + ' items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
 		return footerHTML;
@@ -313,10 +370,10 @@ var LifeGrid = (function() {
 				dataStartIndex,
 				dataEndIndex,
 				pageNumber;
+			gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);	
 			if(this.hasAttribute('data-page-set-index')) {
-				gridOperations.movePageSet(this);	
+				gridOperations.movePageSet(this, gridIndex);	
 			} else {
-				gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);
 				dataStartIndex = parseInt(jQuery(this).attr('data-start-index'));
 				dataEndIndex = parseInt(jQuery(this).attr('data-end-index'));
 				pageNumber = parseInt(jQuery(this).text());
@@ -357,23 +414,24 @@ var LifeGrid = (function() {
 			}
 			
 			if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex] == "undefined") {
-				break;
-			}
-			for(dataIndex in dataForGrid[dataGridIndex].data.value[dataRowIndex]) {
-				dataHTML = "";
-				if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] == "object") {
-					if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] != "undefined") {
-						dataHTML += '<div class="customer-img"><img src="' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] + '" width="" height="" alt="Indranil"></div>';
+				jQuery("div.cell-data", tr).html("");
+			} else {
+				for(dataIndex in dataForGrid[dataGridIndex].data.value[dataRowIndex]) {
+					dataHTML = "";
+					if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] == "object") {
+						if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] != "undefined") {
+							dataHTML += '<div class="customer-img"><img src="' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] + '" width="" height="" alt="Indranil"></div>';
+						}
+						if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] != "undefined") {
+							dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] + '</div>';
+						}
+						
+					} else {
+						dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] + '</div>';
 					}
-					if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] != "undefined") {
-						dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] + '</div>';
-					}
-					
-				} else {
-					dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] + '</div>';
+					jQuery("div.cell-data", tr).eq(dataIndex).html("");
+					jQuery("div.cell-data", tr).eq(dataIndex).html(dataHTML);
 				}
-				jQuery("div.cell-data", tr).eq(dataIndex).html("");
-				jQuery("div.cell-data", tr).eq(dataIndex).html(dataHTML);
 			}
 		}
 
