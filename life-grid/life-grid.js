@@ -445,6 +445,72 @@ var LifeGrid = (function() {
 			jQuery(previousPageNumberDOM).trigger("click");
 		});
 
+		// move to last page
+		jQuery(".db-icon-right-arrow-last", gridContainer).on('click', function() {
+			var gridIndex,
+				presentPaginationDOM,
+				lastMovePageSetDOMIndex,
+				secondLastPageSetDOMIndex,	
+				secondLastPageSetDOM,
+				totalNumberOfMovePageSetDOM;
+
+			gridIndex = jQuery(".db-icon-right-arrow-last", gridContainer).index(jQuery(this));
+			presentPaginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0];
+
+			lastMovePageSetDOMIndex = (jQuery("li", presentPaginationDOM).length -1);
+			totalNumberOfMovePageSetDOM = jQuery("li a[data-page-set-index]", presentPaginationDOM).length;
+			if(totalNumberOfMovePageSetDOM == 1) {
+				secondLastPageSetDOMIndex = 0;	
+			} else {
+				secondLastPageSetDOM = jQuery("li a[data-page-set-index]", presentPaginationDOM).eq(totalNumberOfMovePageSetDOM-2).parent()[0];	
+				secondLastPageSetDOMIndex = jQuery("li", presentPaginationDOM).index(secondLastPageSetDOM);
+			}
+			
+			jQuery("li", presentPaginationDOM).each(function(index) {
+				if(index>=secondLastPageSetDOMIndex && index<lastMovePageSetDOMIndex) {
+					$(this).show();
+				} else {
+					$(this).hide();
+				}
+			});
+
+			jQuery("li a[data-page-index]", presentPaginationDOM).last().trigger('click');
+
+		});
+
+		// move to first page
+		jQuery(".db-icon-left-arrow-first", gridContainer).on('click', function() {
+			var gridIndex,
+				presentPaginationDOM,
+				firstMovePageSetDOMIndex,
+				secondMovePageSetDOM,
+				secondMovePageSetDOMIndex,
+				totalNumberOfMovePageSetDOM;
+
+			gridIndex = jQuery(".db-icon-left-arrow-first", gridContainer).index(jQuery(this));
+			presentPaginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0];			
+
+			firstMovePageSetDOMIndex = 0;
+			totalNumberOfMovePageSetDOM = jQuery("li a[data-page-set-index]", presentPaginationDOM).length;
+			
+			if(totalNumberOfMovePageSetDOM == 1) {
+				secondMovePageSetDOMIndex = jQuery("li", presentPaginationDOM).length - 2;
+			} else {
+				secondMovePageSetDOM = jQuery("li a[data-page-set-index]", presentPaginationDOM).first().parent()[0];
+				secondMovePageSetDOMIndex = jQuery("li", presentPaginationDOM).index(secondMovePageSetDOM);	
+			}
+
+			jQuery("li", presentPaginationDOM).each(function(index) {
+				if(index>=firstMovePageSetDOMIndex && index<=secondMovePageSetDOMIndex) {
+					$(this).show();
+				} else {
+					$(this).hide();
+				}
+			});
+
+			jQuery("li a[data-page-index]", presentPaginationDOM).first().trigger('click');			
+		});
+
 	});
 
 	/**
