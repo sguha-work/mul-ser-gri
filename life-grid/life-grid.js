@@ -478,6 +478,39 @@ var LifeGrid = (function() {
 
 		});
 
+		// move to first page
+		jQuery(".db-icon-left-arrow-first", gridContainer).on('click', function() {
+			var gridIndex,
+				presentPaginationDOM,
+				firstMovePageSetDOMIndex,
+				secondMovePageSetDOM,
+				secondMovePageSetDOMIndex,
+				totalNumberOfMovePageSetDOM;
+
+			gridIndex = jQuery(".db-icon-left-arrow-first", gridContainer).index(jQuery(this));
+			presentPaginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0];			
+
+			firstMovePageSetDOMIndex = 0;
+			totalNumberOfMovePageSetDOM = jQuery("li a[data-page-set-index]", presentPaginationDOM).length;
+			
+			if(totalNumberOfMovePageSetDOM == 1) {
+				secondMovePageSetDOMIndex = jQuery("li", presentPaginationDOM).length - 2;
+			} else {
+				secondMovePageSetDOM = jQuery("li a[data-page-set-index]", presentPaginationDOM).first().parent()[0];
+				secondMovePageSetDOMIndex = jQuery("li", presentPaginationDOM).index(secondMovePageSetDOM);	
+			}
+
+			jQuery("li", presentPaginationDOM).each(function(index) {
+				if(index>=firstMovePageSetDOMIndex && index<=secondMovePageSetDOMIndex) {
+					$(this).show();
+				} else {
+					$(this).hide();
+				}
+			});
+
+			jQuery("li a[data-page-index]", presentPaginationDOM).first().trigger('click');			
+		});
+
 	});
 
 	/**
