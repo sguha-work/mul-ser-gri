@@ -25,6 +25,7 @@ var LifeGrid = (function() {
 		startIndexOfDisplayedData, //{Array} holds the start index of every grid's dislayed data
 		endIndexOfDisplayedData, //{Array} holds the end index of every grid's dislayed data
 		setDataToCell;
+	
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
 	this.render; // Render the grid inside container
@@ -117,6 +118,16 @@ var LifeGrid = (function() {
 
 	// gridOperations holds the functionality like search sort pagination on the grid
 	gridOperations = {};
+
+	/**
+	* @description - This function make all the row opacity 1
+	* @param gridIndex {Number} - 0 based index of grid
+	*/
+	gridOperations.showAllRow = (function(gridIndex) {
+		jQuery("table[data-grid-index='"+gridIndex+"'] tr", gridContainer).css({
+			"opacity": "1"
+		});
+	});
 
 	/**
 	* @description - This function prepare rows for data
@@ -386,6 +397,7 @@ var LifeGrid = (function() {
 				dataEndIndex,
 				pageNumber;
 			gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);	
+			gridOperations.showAllRow(gridIndex);
 			if(this.hasAttribute('data-page-set-index')) {
 				gridOperations.movePageSet(this, gridIndex);	
 			} else {
@@ -416,6 +428,7 @@ var LifeGrid = (function() {
 				nextPageNumberDOM;
 
 			gridIndex = jQuery(".db-icon-left-arrow-next", gridContainer).index(jQuery(this));			
+			gridOperations.showAllRow(gridIndex);
 			presentPaginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0];
 			presentPageNumberDOM = jQuery("a[data-is-current-page='true']",presentPaginationDOM)[0];
 			presentPageNumber = parseInt(jQuery(presentPageNumberDOM).text());
@@ -435,6 +448,7 @@ var LifeGrid = (function() {
 				previousPageNumberDOM;
 
 			gridIndex = jQuery(".db-icon-left-arrow-previous", gridContainer).index(jQuery(this));
+			gridOperations.showAllRow(gridIndex);
 			presentPaginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0];
 			presentPageNumberDOM = jQuery("a[data-is-current-page='true']",presentPaginationDOM)[0];
 			presentPageNumber = parseInt(jQuery(presentPageNumberDOM).text());
@@ -455,6 +469,7 @@ var LifeGrid = (function() {
 				totalNumberOfMovePageSetDOM;
 
 			gridIndex = jQuery(".db-icon-right-arrow-last", gridContainer).index(jQuery(this));
+			gridOperations.showAllRow(gridIndex);
 			presentPaginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0];
 
 			lastMovePageSetDOMIndex = (jQuery("li", presentPaginationDOM).length -1);
@@ -488,6 +503,7 @@ var LifeGrid = (function() {
 				totalNumberOfMovePageSetDOM;
 
 			gridIndex = jQuery(".db-icon-left-arrow-first", gridContainer).index(jQuery(this));
+			gridOperations.showAllRow(gridIndex);
 			presentPaginationDOM = jQuery(".db-pagination", gridContainer).eq(gridIndex)[0];			
 
 			firstMovePageSetDOMIndex = 0;
