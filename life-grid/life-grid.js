@@ -415,6 +415,11 @@ var LifeGrid = (function() {
 				jQuery(this).attr("data-is-current-page", "true");
 				gridOperations.moveToPage(gridIndex, dataStartIndex, dataEndIndex, pageNumber);
 			}
+
+			// if search text is not empty reinvoking search method after changing content of grid
+			if(jQuery.trim(jQuery("input[type='text'].search",gridContainer).eq(gridIndex).val()) !== "") {
+				jQuery("input[value='Search']", gridContainer).eq(gridIndex).trigger('click');
+			}
 		});
 
 		// move to next page
