@@ -132,6 +132,18 @@ var LifeGrid = (function() {
 	});
 
 	/**
+	* @description - Prepare image to displayble DOM
+	* @param data {Object/String} - The data which is going to be displayed
+	* @returns {String} - The data encapsulated in HTML
+	*/
+	dataToDOM.prepareImage = (function(data) {
+		var dataHTML;
+		dataHTML = "";
+		dataHTML = '<div class="customer-img"><img src="' + data + '" width="" height="" alt=""></div>';
+		return dataHTML;
+	});
+
+	/**
 	* @description - Prepare object to displayble DOM
 	* @param data {Object/String} - The data which is going to be displayed
 	* @returns {String} - The data encapsulated in HTML
@@ -140,10 +152,10 @@ var LifeGrid = (function() {
 		var dataHTML;
 		dataHTML = "";
 		if(typeof data["image"] != "undefined") {
-			dataHTML += '<div class="customer-img"><img src="' + data["image"] + '" width="" height="" alt="Indranil"></div>';
+			dataHTML += dataToDOM.prepareImage(data["image"]);
 		}
 		if(typeof data["text"] != "undefined") {
-			dataHTML += '<div class="customer-text">' + data["text"] + '</div>';
+			dataHTML += dataToDOM.prepareText(data["text"]);
 		}
 		return dataHTML;
 	});
