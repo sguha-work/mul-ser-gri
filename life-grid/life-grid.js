@@ -24,7 +24,8 @@ var LifeGrid = (function() {
 		startInjectingData,
 		startIndexOfDisplayedData, //{Array} holds the start index of every grid's dislayed data
 		endIndexOfDisplayedData, //{Array} holds the end index of every grid's dislayed data
-		setDataToCell;
+		setDataToCell,
+		dataToDOM;// {Object} holds the methods to convert data to DOM
 	
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
@@ -114,6 +115,49 @@ var LifeGrid = (function() {
 			}
 		}
 		return object1;
+	});
+
+	// This object holds the methods which converts data to DOM
+	dataToDOM = {};
+
+	/**
+	* @description - Prepare text to displayble DOM
+	* @param data {Object/String} - The data which is going to be displayed
+	* @returns {String} - The data encapsulated in HTML
+	*/
+	dataToDOM.prepareText = (function(data) {
+		var html;
+		html = '<div class="customer-text">' + data + '</div>';
+		return html;
+	});
+
+	/**
+	* @description - Prepare image to displayble DOM
+	* @param data {Object/String} - The data which is going to be displayed
+	* @returns {String} - The data encapsulated in HTML
+	*/
+	dataToDOM.prepareImage = (function(data) {
+		var dataHTML;
+		dataHTML = "";
+		dataHTML = '<div class="customer-img"><img src="' + data + '" width="" height="" alt=""></div>';
+		return dataHTML;
+	});
+
+	/**
+	* @description - Prepare object to displayble DOM
+	* @param data {Object/String} - The data which is going to be displayed
+	* @returns {String} - The data encapsulated in HTML
+	*/
+	dataToDOM.prepareObject = (function(data) {
+		var dataHTML;
+		dataHTML = "";
+		if(typeof data["image"] != "undefined") {
+			dataHTML += dataToDOM.prepareImage(data["image"]);
+		}
+		if(typeof data["text"] != "undefined") {
+			dataHTML += dataToDOM.prepareText(data["text"]);
+		}
+		return dataHTML;
 	});
 
 	// gridOperations holds the functionality like search sort pagination on the grid
@@ -415,6 +459,11 @@ var LifeGrid = (function() {
 				jQuery(this).attr("data-is-current-page", "true");
 				gridOperations.moveToPage(gridIndex, dataStartIndex, dataEndIndex, pageNumber);
 			}
+
+			// if search text is not empty reinvoking search method after changing content of grid
+			if(jQuery.trim(jQuery("input[type='text'].search",gridContainer).eq(gridIndex).val()) !== "") {
+				jQuery("input[value='Search']", gridContainer).eq(gridIndex).trigger('click');
+			}
 		});
 
 		// move to next page
@@ -558,15 +607,10 @@ var LifeGrid = (function() {
 				for(dataIndex in dataForGrid[dataGridIndex].data.value[dataRowIndex]) {
 					dataHTML = "";
 					if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] == "object") {
-						if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] != "undefined") {
-							dataHTML += '<div class="customer-img"><img src="' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["image"] + '" width="" height="" alt="Indranil"></div>';
-						}
-						if(typeof dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] != "undefined") {
-							dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]["text"] + '</div>';
-						}
+						dataHTML += dataToDOM.prepareObject(dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]);
 						
 					} else {
-						dataHTML += '<div class="customer-text">' + dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex] + '</div>';
+						dataHTML += dataToDOM.prepareText(dataForGrid[dataGridIndex].data.value[dataRowIndex][dataIndex]);
 					}
 					jQuery("div.cell-data", tr).eq(dataIndex).html("");
 					jQuery("div.cell-data", tr).eq(dataIndex).html(dataHTML);
