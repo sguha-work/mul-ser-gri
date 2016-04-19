@@ -79,8 +79,39 @@ var LifeGrid = (function() {
 			attributes.style = styleObject; 
 			jQuery("table[data-grid-index]", gridContainer).css(attributes.style);
 		},
+
 		getStyle: function() {
 			return attributes.style;
+		},
+
+		setCpationStyle: function(captionStyleObject) {
+			var colorIndex;
+			colorIndex = 0;
+			attributes.caption = captionStyleObject;
+			if(typeof attributes.caption.captionColor !== "undefined") {
+				jQuery(".table-caption", gridContainer).each(function() {
+					if(typeof attributes.caption.captionColor[colorIndex] === "undefined") {
+						colorIndex = 0;
+					}
+					jQuery(this).css({
+						"color": attributes.caption.captionColor[colorIndex]
+					});
+					colorIndex += 1;
+				});
+			}
+
+			colorIndex = 0;
+			if(typeof attributes.caption.captionFillColor !== "undefined") {
+				jQuery(".table-caption", gridContainer).each(function() {
+					if(typeof attributes.caption.captionColor[colorIndex] === "undefined") {
+						colorIndex = 0;
+					}
+					jQuery(this).css({
+						"background-color": attributes.caption.captionColor[colorIndex]
+					});
+					colorIndex += 1;
+				});		
+			}			
 		}
 	};
 
@@ -787,7 +818,7 @@ var LifeGrid = (function() {
 	* @param styleObject {Object} - The styles which will be applied to all grids, provide attribute name and value as javascript's css format
 	*/
 	this.setGridStyle = (function(styleObject) {
-		apiMethods.setStyle(styleObject);
+		attributeMethods.setStyle(styleObject);
 	});
 
 	/**
@@ -795,7 +826,16 @@ var LifeGrid = (function() {
 	* @returns {Object} - The style object which is already applied presently in the grids
 	*/
 	this.getGridStyle = (function() {
-		return apiMethods.getStyle();
+		return attributeMethods.getStyle();
 	});
+
+	/**
+	* @description - This function is the constructor of LifeGrid
+	* @param captionStyleObject {Object} - The styles which will be applied to all grids captions and sub captions if exists
+	*/
+	this.setCaptionStyle = (function(captionStyleObject) {
+		attributeMethods.setCpationStyle(captionStyleObject);
+	});
+
 }),
 LG = LifeGrid;
