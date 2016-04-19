@@ -11,7 +11,7 @@ var LifeGrid = (function() {
 		prepareTableHeader,
 		prepareRowOfTable,
 		prepareDOM,
-		startAttachingAttribute,
+		startAttachingInitialAttributes,
 		startBindingEvents,
 		prepareTableCaption,
 		prepareTableFooter,
@@ -26,7 +26,9 @@ var LifeGrid = (function() {
 		endIndexOfDisplayedData, //{Array} holds the end index of every grid's dislayed data
 		setDataToCell,
 		dataToDOM,// {Object} holds the methods to convert data to DOM
-		attributeMethods; // {Object holds the methods to set or get attribute}
+		attributeMethods, // {Object holds the methods to set or get attribute}
+		startAttachingOtherAttributes;
+
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
 	this.render; // Render the grid inside container
@@ -77,8 +79,39 @@ var LifeGrid = (function() {
 			attributes.style = styleObject; 
 			jQuery("table[data-grid-index]", gridContainer).css(attributes.style);
 		},
+
 		getStyle: function() {
 			return attributes.style;
+		},
+
+		setCpationStyle: function(captionStyleObject) {
+			var colorIndex;
+			colorIndex = 0;
+			attributes.caption = captionStyleObject;
+			if(typeof attributes.caption.captionColor !== "undefined") {
+				jQuery(".table-caption", gridContainer).each(function() {
+					if(typeof attributes.caption.captionColor[colorIndex] === "undefined") {
+						colorIndex = 0;
+					}
+					jQuery(this).css({
+						"color": attributes.caption.captionColor[colorIndex]
+					});
+					colorIndex += 1;
+				});
+			}
+
+			colorIndex = 0;
+			if(typeof attributes.caption.captionFillColor !== "undefined") {
+				jQuery(".table-caption", gridContainer).each(function() {
+					if(typeof attributes.caption.captionColor[colorIndex] === "undefined") {
+						colorIndex = 0;
+					}
+					jQuery(this).css({
+						"background-color": attributes.caption.captionColor[colorIndex]
+					});
+					colorIndex += 1;
+				});		
+			}			
 		}
 	};
 
@@ -418,9 +451,15 @@ var LifeGrid = (function() {
 	/**
 	* @description - Begins attaching attribute (both default and user given) to the grid
 	*/
-	startAttachingAttribute = (function() {
+	startAttachingInitialAttributes = (function() {
 		// merging user given attributes to main attribute
 		attributes = common.mergeObject(attributes, userGivenAttributes);
+	});
+
+	/**
+	* @description - Starts attaching other attributes which should be applied after populating the grid
+	*/
+	startAttachingOtherAttributes = (function() {
 		attributeMethods.setStyle(attributes.style); // attaching styles
 	});
 
@@ -695,8 +734,9 @@ var LifeGrid = (function() {
 			dataKeyIndex,
 			dataGridIndex;
 
+		startAttachingInitialAttributes();	
 		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
-			startAttachingAttribute();
+			
 			gridHTML = prepareTableCaption(0);
 			gridHTML += prepareTableHeader(dataForGrid[0].data.label);	
 			gridHTML += prepareRowOfTable(attributes.pagination.dataPerPage, dataForGrid[0].data.value[0].length, 0);
@@ -706,7 +746,6 @@ var LifeGrid = (function() {
 			startInjectingData(0, (attributes.pagination.dataPerPage-1), 0);
 
 		} else { // for multiseriese
-			startAttachingAttribute();
 			gridHTML = "";
 			for(dataGridIndex in dataForGrid) {
 				gridHTML += prepareTableCaption(dataGridIndex);
@@ -720,6 +759,7 @@ var LifeGrid = (function() {
 				startInjectingData(0, (attributes.pagination.dataPerPage-1), dataGridIndex);
 			}
 		}
+		startAttachingOtherAttributes();
 	});
 
 	/**
@@ -778,7 +818,7 @@ var LifeGrid = (function() {
 	* @param styleObject {Object} - The styles which will be applied to all grids, provide attribute name and value as javascript's css format
 	*/
 	this.setGridStyle = (function(styleObject) {
-		apiMethods.setStyle(styleObject);
+		attributeMethods.setStyle(styleObject);
 	});
 
 	/**
@@ -786,7 +826,16 @@ var LifeGrid = (function() {
 	* @returns {Object} - The style object which is already applied presently in the grids
 	*/
 	this.getGridStyle = (function() {
-		return apiMethods.getStyle();
+		return attributeMethods.getStyle();
 	});
+
+	/**
+	* @description - This function is the constructor of LifeGrid
+	* @param captionStyleObject {Object} - The styles which will be applied to all grids captions and sub captions if exists
+	*/
+	this.setCaptionStyle = (function(captionStyleObject) {
+		attributeMethods.setCpationStyle(captionStyleObject);
+	});
+
 }),
 LG = LifeGrid;
