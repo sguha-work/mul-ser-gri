@@ -25,12 +25,13 @@ var LifeGrid = (function() {
 		startIndexOfDisplayedData, //{Array} holds the start index of every grid's dislayed data
 		endIndexOfDisplayedData, //{Array} holds the end index of every grid's dislayed data
 		setDataToCell,
-		dataToDOM;// {Object} holds the methods to convert data to DOM
-	
+		dataToDOM,// {Object} holds the methods to convert data to DOM
+		attributeMethods; // {Object holds the methods to set or get attribute}
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
 	this.render; // Render the grid inside container
-	this.api; // {Object} holds all the api methods
+	this.setGridStyle; // This function set the grid style
+	this.getGridStyle;// This function returns the present style object of the grid
 
 	attributes = {
 		isAnimate: true,
@@ -69,7 +70,17 @@ var LifeGrid = (function() {
 			dataPerPage: 20
 		}
 
-	}
+	};
+
+	attributeMethods = {
+		setStyle: function(styleObject) {
+			attributes.style = styleObject; 
+			jQuery("table[data-grid-index]", gridContainer).css(attributes.style);
+		},
+		getStyle: function() {
+			return attributes.style;
+		}
+	};
 
 	/**
 	* @description - This method add resource files to the page
@@ -410,7 +421,7 @@ var LifeGrid = (function() {
 	startAttachingAttribute = (function() {
 		// merging user given attributes to main attribute
 		attributes = common.mergeObject(attributes, userGivenAttributes);
-		
+		attributeMethods.setStyle(attributes.style); // attaching styles
 	});
 
 	/**
@@ -760,6 +771,22 @@ var LifeGrid = (function() {
 	*/
 	this.render = (function() {
 		startRenderingTheGrid();
+	});
+
+	/**
+	* @description - This function is the constructor of LifeGrid
+	* @param styleObject {Object} - The styles which will be applied to all grids, provide attribute name and value as javascript's css format
+	*/
+	this.setGridStyle = (function(styleObject) {
+		apiMethods.setStyle(styleObject);
+	});
+
+	/**
+	* @description - This function is the constructor of LifeGrid
+	* @returns {Object} - The style object which is already applied presently in the grids
+	*/
+	this.getGridStyle = (function() {
+		return apiMethods.getStyle();
 	});
 }),
 LG = LifeGrid;
