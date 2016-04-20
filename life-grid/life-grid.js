@@ -39,7 +39,7 @@ var LifeGrid = (function() {
 		isAnimate: true,
 		style: {
 			border: "solid", // {String}, border of the table
-			borderWidth: 0, // {Number}, width of the border
+			borderWidth: "0px", // {Number}, width of the border
 			borderColor: "" //{String}, color code of the border
 		},
 		caption: {
@@ -76,7 +76,7 @@ var LifeGrid = (function() {
 
 	attributeMethods = {
 		setStyle: function(styleObject) {
-			attributes.style = styleObject; 
+			attributes = common.mergeObject(attributes, {"style": styleObject}); 
 			jQuery("table[data-grid-index]", gridContainer).css(attributes.style);
 		},
 
@@ -86,8 +86,9 @@ var LifeGrid = (function() {
 
 		setCpationStyle: function(captionStyleObject) {
 			var colorIndex;
+			attributes = common.mergeObject(attributes, {"caption": captionStyleObject});
+
 			colorIndex = 0;
-			attributes.caption = captionStyleObject;
 			if(typeof attributes.caption.captionColor !== "undefined") {
 				jQuery(".table-caption", gridContainer).each(function() {
 					if(typeof attributes.caption.captionColor[colorIndex] === "undefined") {
@@ -111,7 +112,34 @@ var LifeGrid = (function() {
 					});
 					colorIndex += 1;
 				});		
-			}			
+			}
+
+			colorIndex = 0;
+			if(typeof attributes.caption.captionColor !== "undefined") {
+				jQuery(".db-table-caption p", gridContainer).each(function() {
+					if(typeof attributes.caption.captionColor[colorIndex] === "undefined") {
+						colorIndex = 0;
+					}
+					jQuery(this).css({
+						"color": attributes.caption.captionColor[colorIndex]
+					});
+					colorIndex += 1;
+				});
+			}
+
+			colorIndex = 0;
+			if(typeof attributes.caption.captionFillColor !== "undefined") {
+				jQuery(".db-table-caption p", gridContainer).each(function() {
+					if(typeof attributes.caption.captionColor[colorIndex] === "undefined") {
+						colorIndex = 0;
+					}
+					jQuery(this).css({
+						"background-color": attributes.caption.captionColor[colorIndex]
+					});
+					colorIndex += 1;
+				});		
+			}
+
 		},
 
 		getCaptionStyle: function() {
@@ -155,6 +183,7 @@ var LifeGrid = (function() {
 			for(childAttributeKeyIndex in childAttributeKeys) {
 				if(typeof object2[object1Keys[globalAttributeKeyIndex]] != "undefined" && typeof object2[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]] != "undefined") {
 					if(typeof object2[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]] == typeof object1[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]]) {
+						console.log(object1[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]]);
 						object1[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]] = object2[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]];
 					} else {
 						// the data provided as attribute value is not valid
