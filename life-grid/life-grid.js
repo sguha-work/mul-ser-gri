@@ -112,6 +112,10 @@ var LifeGrid = (function() {
 					colorIndex += 1;
 				});		
 			}			
+		},
+
+		getCaptionStyle: function() {
+			return attribute.caption;
 		}
 	};
 
@@ -835,6 +839,14 @@ var LifeGrid = (function() {
 	*/
 	this.setCaptionStyle = (function(captionStyleObject) {
 		attributeMethods.setCpationStyle(captionStyleObject);
+	});
+
+	/**
+	* @description - This function is the constructor of LifeGrid
+	* @returns {Object} - The style object which is already applied presently in the grid's captions and subcaptions if exists
+	*/
+	this.getCaptionStyle = (function() {
+		return attributeMethods.getCaptionStyle();
 	});
 
 }),
