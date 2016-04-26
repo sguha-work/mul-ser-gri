@@ -312,7 +312,22 @@ var LifeGrid = (function() {
 	// gridOperations holds the functionality like search sort pagination on the grid
 	gridOperations = {};
 
+	/**
+	* @description - This function check the URL string and change the grid according to the URL
+	*/
+	gridOperations.checkAndChangeGridWithURL = (function() {
+		var urlObject,
+			index,
+			paginationContainer;
 
+		urlObject = common.parseURLString();
+		if(urlObject.page.length) {
+			for(index in urlObject.page) {
+				paginationContainer = jQuery(".db-pagination-wrapper", gridContainer).eq(urlObject.page[index].grid)[0];
+				jQuery("li a", paginationContainer).eq(urlObject.page[index].page).trigger('click');
+			}
+		}
+	})
 	
 	/**
 	* @description - This function make all the row opacity 1
@@ -592,7 +607,7 @@ var LifeGrid = (function() {
 		});
 
 		// Attaching pagination event
-		jQuery(".db-pagination li a", gridContainer).on('click', function() {
+		jQuery(".db-pagination li a", gridContainer).on('click', function(event) {
 			var gridIndex,
 				dataStartIndex,
 				dataEndIndex,
@@ -625,15 +640,17 @@ var LifeGrid = (function() {
 				jQuery("input[value='Search']", gridContainer).eq(gridIndex).trigger('click');
 			}
 
-			urlObject = common.parseURLString();
-			
-			pageObject = {};
-			pageObject.grid = gridIndex;
-			pageObject.page = pageNumber - 1;
+			if(event.which) {
+				urlObject = common.parseURLString();
+				
+				pageObject = {};
+				pageObject.grid = gridIndex;
+				pageObject.page = pageNumber - 1;
 
-			newURLString = common.prepareURLString("page", pageObject, urlObject);
-			
-			window.location.hash = newURLString;
+				newURLString = common.prepareURLString("page", pageObject, urlObject);
+				
+				window.location.hash = newURLString;
+			}
 			return false;
 		});
 
@@ -881,6 +898,7 @@ var LifeGrid = (function() {
 			}
 		}
 		startAttachingOtherAttributes();
+		gridOperations.checkAndChangeGridWithURL();
 	});
 
 	/**
