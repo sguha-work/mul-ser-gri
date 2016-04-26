@@ -165,6 +165,79 @@ var LifeGrid = (function() {
 	// common is the core object holding basic functionalities
 	common = {};
 	
+	common.prepareURLObjectWithOldObjectAndNewValue = (function(type, value, previousObject) {
+		var lifeGridUrlObject,
+			flag,
+			index;
+
+		lifeGridUrlObject = previousObject;
+		switch(type) {
+			case "page":
+				if(!lifeGridUrlObject.page.length) {
+					lifeGridUrlObject.page.push(value);
+				} else {
+					for(index in lifeGridUrlObject.page) {
+						if(lifeGridUrlObject.page[index].grid == value.grid) {
+							lifeGridUrlObject.page[index].page = value.page;
+							flag = 1;
+						}
+					}
+					if(!flag) {
+						lifeGridUrlObject.page.push(value);
+					}
+				}
+			break; 
+		}
+		return lifeGridUrlObject;
+	});
+	
+	common.prepareURLString = (function(type, value, previousObject) {
+		var urlObject,
+			urlString,
+			index;
+
+		urlObject = common.prepareURLObjectWithOldObjectAndNewValue(type, value, previousObject);
+		urlString = "#";
+		if(urlObject.page.length) {
+			urlString += "lggrid-page=";console.log(urlObject.page.length);
+			for(index in urlObject.page) {
+				urlString += (urlObject.page[index].grid+1)+"-"+(urlObject.page[index].page+1) + "--";
+			}
+			urlString = urlString.slice(0, -2);
+		}
+		return urlString;
+	});
+
+	common.parseURLString = (function() {
+		var presentURLString,
+			presentURLArray,
+			presentLifeGridString,
+			urlObject,
+			index,
+			pageObject;
+
+		presentLifeGridString = "";	
+		presentURLString = window.location.hash;
+		urlObject = {};
+		urlObject.page = [];
+		urlObject.search = [];
+		urlObject.sort = [];
+
+		if(presentURLString.indexOf("lggrid-page=") != -1) {
+			presentURLArray = presentURLString.split("lggrid-page=")[1].split(",")[0].split("--");
+			for(index in presentURLArray) {
+				pageObject = {};
+				pageObject.grid = parseInt(presentURLArray[index].split("-")[0])-1;
+				pageObject.page = parseInt(presentURLArray[index].split("-")[1])-1;
+				urlObject.page.push(pageObject);
+			}
+		}
+
+
+
+		return urlObject;
+	});
+
 	/**
 	* @description - Merge the properties of two object
 	* @param object1 {Object} - First and parent object
@@ -183,7 +256,6 @@ var LifeGrid = (function() {
 			for(childAttributeKeyIndex in childAttributeKeys) {
 				if(typeof object2[object1Keys[globalAttributeKeyIndex]] != "undefined" && typeof object2[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]] != "undefined") {
 					if(typeof object2[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]] == typeof object1[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]]) {
-						console.log(object1[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]]);
 						object1[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]] = object2[object1Keys[globalAttributeKeyIndex]][childAttributeKeys[childAttributeKeyIndex]];
 					} else {
 						// the data provided as attribute value is not valid
@@ -240,6 +312,23 @@ var LifeGrid = (function() {
 	// gridOperations holds the functionality like search sort pagination on the grid
 	gridOperations = {};
 
+	/**
+	* @description - This function check the URL string and change the grid according to the URL
+	*/
+	gridOperations.checkAndChangeGridWithURL = (function() {
+		var urlObject,
+			index,
+			paginationContainer;
+
+		urlObject = common.parseURLString();
+		if(urlObject.page.length) {
+			for(index in urlObject.page) {
+				paginationContainer = jQuery(".db-pagination-wrapper", gridContainer).eq(urlObject.page[index].grid)[0];
+				//jQuery("li a[data-page-index]", paginationContainer).eq(urlObject.page[index].page).trigger('click');
+			}
+		}
+	})
+	
 	/**
 	* @description - This function make all the row opacity 1
 	* @param gridIndex {Number} - 0 based index of grid
@@ -391,7 +480,7 @@ var LifeGrid = (function() {
 			headerHTML;
 		headerHTML = '<div class="db-table-header"><table role="table-header"><tbody><colgroup><col style="width:20%"><col style="width:30%"><col style="width:30%"><col style="width:20%"></colgroup><tr>';
 		for(var index in headers) {
-			headerHTML += '<td><a class="header" href="#">' + headers[index] + ' <span class="db-icon db-icon-up"></span></a></td>';
+			headerHTML += '<td><a class="header" href="javascript:void(0)">' + headers[index] + ' <span class="db-icon db-icon-up"></span></a></td>';
 		}
 		
 		headerHTML += "</tr></tbody></table></div>";
@@ -452,23 +541,23 @@ var LifeGrid = (function() {
 				currentPageFlag = false;
 			}
 			if(pageIndex <= 5) {
-				pageNumberHTML += '<li><a data-is-current-page="'+currentPageFlag+'" style="font-weight:'+pageNumberFontWeight+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';
+				pageNumberHTML += '<li><a data-is-current-page="'+currentPageFlag+'" style="font-weight:'+pageNumberFontWeight+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="javascript:void(0)" class="page-link">' + pageIndex + '</a></li>';
 			} else {
 				if((pageIndex % 6) == 0) {
 					if(!pageSetIndexFlag) {
-						pageNumberHTML += '<li><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';					
+						pageNumberHTML += '<li><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="javascript:void(0)">......</a></li>';					
 						pageSetIndexFlag = 1;
 					} else {
-						pageNumberHTML += '<li style="display:none"><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';						
+						pageNumberHTML += '<li style="display:none"><a data-move-set-direction="r" data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="javascript:void(0)">......</a></li>';						
 					}
 					pageSetIndex += 1;
 				}
-				pageNumberHTML += '<li style="display:none; font-weight:'+pageNumberFontWeight+'"><a data-is-current-page="'+currentPageFlag+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="#page='+pageIndex+'" class="page-link">' + pageIndex + '</a></li>';				
+				pageNumberHTML += '<li style="display:none; font-weight:'+pageNumberFontWeight+'"><a data-is-current-page="'+currentPageFlag+'" data-page-index="'+pageIndex+'" data-start-index="' + dataStartIndex + '" data-end-index="' + dataEndIndex + '" href="javascript:void(0)" class="page-link">' + pageIndex + '</a></li>';				
 			}
 		}
-		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="#">......</a></li>';
+		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="javascript:void(0)">......</a></li>';
 		
-		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="#" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="#" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="#" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="#" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label></label> - <label></label> of ' + totalNumberOfData + ' items</span><a href="#" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
+		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="javascript:void(0)" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="javascript:void(0)" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="javascript:void(0)" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="javascript:void(0)" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label></label> - <label></label> of ' + totalNumberOfData + ' items</span><a href="javascript:void(0)" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
 		return footerHTML;
 	});
 
@@ -518,11 +607,14 @@ var LifeGrid = (function() {
 		});
 
 		// Attaching pagination event
-		jQuery(".db-pagination li a", gridContainer).on('click', function() {
+		jQuery(".db-pagination li a", gridContainer).on('click', function(event) {
 			var gridIndex,
 				dataStartIndex,
 				dataEndIndex,
-				pageNumber;
+				pageNumber,
+				urlObject,
+				newURLString,
+				pageObject;
 			gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);	
 			gridOperations.showAllRow(gridIndex);
 			if(this.hasAttribute('data-page-set-index')) {
@@ -547,6 +639,19 @@ var LifeGrid = (function() {
 			if(jQuery.trim(jQuery("input[type='text'].search",gridContainer).eq(gridIndex).val()) !== "") {
 				jQuery("input[value='Search']", gridContainer).eq(gridIndex).trigger('click');
 			}
+
+			if(event.which) {
+				urlObject = common.parseURLString();
+				
+				pageObject = {};
+				pageObject.grid = gridIndex;
+				pageObject.page = pageNumber - 1;
+
+				newURLString = common.prepareURLString("page", pageObject, urlObject);
+				
+				window.location.hash = newURLString;
+			}
+			return false;
 		});
 
 		// move to next page
@@ -616,6 +721,7 @@ var LifeGrid = (function() {
 			jQuery("li", presentPaginationDOM).each(function(index) {
 				if(index>=secondLastPageSetDOMIndex && index<lastMovePageSetDOMIndex) {
 					$(this).show();
+					$("a",this).attr('data-move-set-direction', 'l');
 				} else {
 					$(this).hide();
 				}
@@ -793,6 +899,7 @@ var LifeGrid = (function() {
 			}
 		}
 		startAttachingOtherAttributes();
+		gridOperations.checkAndChangeGridWithURL();
 	});
 
 	/**
