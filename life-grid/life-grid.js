@@ -640,7 +640,7 @@ var LifeGrid = (function() {
 				jQuery("input[value='Search']", gridContainer).eq(gridIndex).trigger('click');
 			}
 
-			if(event.which) {
+			if(this.hasAttribute('data-page-index')) {
 				urlObject = common.parseURLString();
 				
 				pageObject = {};
