@@ -165,35 +165,77 @@ var LifeGrid = (function() {
 	// common is the core object holding basic functionalities
 	common = {};
 	
-	common.prepareURLObject = (function(type, value, previousObject) {
-		var lifeGridUrlObject;
-		lifeGridUrlObject = {}
-		if(typeof previousObject == "undefined") {
-			previousObject = {};
-		}
+	common.prepareURLObjectWithOldObjectAndNewValue = (function(type, value, previousObject) {
+		var lifeGridUrlObject,
+			flag,
+			index;
+
 		lifeGridUrlObject = previousObject;
 		switch(type) {
 			case "page":
-				lifeGridUrlObject.pagination = {};
-				lifeGridUrlObject.pagination.page = value;
+				if(!lifeGridUrlObject.page.length) {
+					lifeGridUrlObject.page.push(value);
+				} else {
+					for(index in lifeGridUrlObject.page) {
+						if(lifeGridUrlObject.page[index].grid == value.grid) {
+							lifeGridUrlObject.page[index].page = value.page;
+							flag = 1;
+						}
+					}
+					if(!flag) {
+						lifeGridUrlObject.page.push(value);
+					}
+				}
 			break; 
 		}
-		return "lifegrid-object=" + JSON.stringify(lifeGridUrlObject).split("{").join("--").split("}").join("||");
+		return lifeGridUrlObject;
+	});
+	
+	common.prepareURLString = (function(type, value, previousObject) {
+		var urlObject,
+			urlString,
+			index;
+
+		urlObject = common.prepareURLObjectWithOldObjectAndNewValue(type, value, previousObject);
+		urlString = "#";
+		if(urlObject.page.length) {
+			urlString += "lggrid-page=";console.log(urlObject.page.length);
+			for(index in urlObject.page) {
+				urlString += (urlObject.page[index].grid+1)+"-"+(urlObject.page[index].page+1) + "--";
+			}
+			urlString = urlString.slice(0, -2);
+		}
+		return urlString;
 	});
 
 	common.parseURLString = (function() {
-		var presentURLArray,
-			presentLifeGridString;
+		var presentURLString,
+			presentURLArray,
+			presentLifeGridString,
+			urlObject,
+			index,
+			pageObject;
 
 		presentLifeGridString = "";	
-		presentURLArray = window.location.hash.split("lifegrid-object=");
-		presentLifeGridString = ((presentURLArray.length>1)?presentURLArray[1]:"");
-		if(presentLifeGridString != "") {
-			presentLifeGridString = presentLifeGridString.split("--").join("{").split("||").join("}");
-			return JSON.parse(presentLifeGridString);
-		} else {
-			return "";
+		presentURLString = window.location.hash;
+		urlObject = {};
+		urlObject.page = [];
+		urlObject.search = [];
+		urlObject.sort = [];
+
+		if(presentURLString.indexOf("lggrid-page=") != -1) {
+			presentURLArray = presentURLString.split("lggrid-page=")[1].split(",")[0].split("--");
+			for(index in presentURLArray) {
+				pageObject = {};
+				pageObject.grid = parseInt(presentURLArray[index].split("-")[0])-1;
+				pageObject.page = parseInt(presentURLArray[index].split("-")[1])-1;
+				urlObject.page.push(pageObject);
+			}
 		}
+
+
+
+		return urlObject;
 	});
 
 	/**
@@ -556,7 +598,8 @@ var LifeGrid = (function() {
 				dataEndIndex,
 				pageNumber,
 				urlObject,
-				newURLString;
+				newURLString,
+				pageObject;
 			gridIndex = jQuery(".db-pagination", gridContainer).index(jQuery(this).parent().parent()[0]);	
 			gridOperations.showAllRow(gridIndex);
 			if(this.hasAttribute('data-page-set-index')) {
@@ -583,11 +626,13 @@ var LifeGrid = (function() {
 			}
 
 			urlObject = common.parseURLString();
-			if(urlObject == "") {
-				newURLString = common.prepareURLObject("page", pageNumber);
-			} else {
-				newURLString = common.prepareURLObject("page", pageNumber, urlObject);
-			}console.log(newURLString);
+			
+			pageObject = {};
+			pageObject.grid = gridIndex;
+			pageObject.page = pageNumber - 1;
+
+			newURLString = common.prepareURLString("page", pageObject, urlObject);
+			
 			window.location.hash = newURLString;
 			return false;
 		});
