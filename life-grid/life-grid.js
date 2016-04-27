@@ -199,9 +199,9 @@ var LifeGrid = (function() {
 		urlObject = common.prepareURLObjectWithOldObjectAndNewValue(type, value, previousObject);
 		urlString = "#";
 		if(urlObject.page.length) {
-			urlString += "lggrid-page=";console.log(urlObject.page.length);
+			urlString += "lggrid-page=";
 			for(index in urlObject.page) {
-				urlString += (urlObject.page[index].grid+1)+"-"+(urlObject.page[index].page+1) + "--";
+				urlString += (urlObject.page[index].grid+1)+"-"+(urlObject.page[index].page) + "--";
 			}
 			urlString = urlString.slice(0, -2);
 		}
@@ -228,7 +228,7 @@ var LifeGrid = (function() {
 			for(index in presentURLArray) {
 				pageObject = {};
 				pageObject.grid = parseInt(presentURLArray[index].split("-")[0])-1;
-				pageObject.page = parseInt(presentURLArray[index].split("-")[1])-1;
+				pageObject.page = parseInt(presentURLArray[index].split("-")[1]);
 				urlObject.page.push(pageObject);
 			}
 		}
@@ -318,13 +318,15 @@ var LifeGrid = (function() {
 	gridOperations.checkAndChangeGridWithURL = (function() {
 		var urlObject,
 			index,
-			paginationContainer;
+			paginationContainer,
+			timer;
 
 		urlObject = common.parseURLString();
 		if(urlObject.page.length) {
 			for(index in urlObject.page) {
 				paginationContainer = jQuery(".db-pagination-wrapper", gridContainer).eq(urlObject.page[index].grid)[0];
-				//jQuery("li a[data-page-index]", paginationContainer).eq(urlObject.page[index].page).trigger('click');
+				jQuery("li a[data-page-index]", paginationContainer).eq(urlObject.page[index].page).attr('data-clicked-externally', 'true');
+				jQuery("li a[data-page-index]", paginationContainer).eq(urlObject.page[index].page-1).trigger('click');
 			}
 		}
 	})
@@ -640,16 +642,20 @@ var LifeGrid = (function() {
 				jQuery("input[value='Search']", gridContainer).eq(gridIndex).trigger('click');
 			}
 
-			if(this.hasAttribute('data-page-index')) {
+			if(this.hasAttribute('data-page-index') && !this.hasAttribute('data-clicked-externally')) {
 				urlObject = common.parseURLString();
 				
 				pageObject = {};
 				pageObject.grid = gridIndex;
-				pageObject.page = pageNumber - 1;
+				pageObject.page = pageNumber;
 
 				newURLString = common.prepareURLString("page", pageObject, urlObject);
 				
 				window.location.hash = newURLString;
+			}
+
+			if(this.hasAttribute('data-clicked-externally')) {
+				jQuery(this).removeAttr('data-clicked-externally');
 			}
 			return false;
 		});
@@ -899,7 +905,10 @@ var LifeGrid = (function() {
 			}
 		}
 		startAttachingOtherAttributes();
-		gridOperations.checkAndChangeGridWithURL();
+		window.setTimeout(function() {
+			gridOperations.checkAndChangeGridWithURL();	
+		}, 1000);
+		
 	});
 
 	/**
