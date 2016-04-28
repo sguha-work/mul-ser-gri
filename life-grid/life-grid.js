@@ -162,9 +162,13 @@ var LifeGrid = (function() {
 	    head.appendChild(link);
 	});	
 
-	// common is the core object holding basic functionalities
+	// common is the core object holding basic operations used throughout the program
 	common = {};
 	
+	/**
+	* @description - Prepare new URL object with old URL object and new type values
+	* @return {Object} - The new URL object
+	*/
 	common.prepareURLObjectWithOldObjectAndNewValue = (function(type, value, previousObject) {
 		var lifeGridUrlObject,
 			flag,
@@ -191,6 +195,10 @@ var LifeGrid = (function() {
 		return lifeGridUrlObject;
 	});
 	
+	/**
+	* @description - prepare the url string with new values and previous url object if exists
+	* @return {Object} - The URL hashtag
+	*/	
 	common.prepareURLString = (function(type, value, previousObject) {
 		var urlObject,
 			urlString,
@@ -208,6 +216,10 @@ var LifeGrid = (function() {
 		return urlString;
 	});
 
+	/**
+	* @description - This method parse the hashtag of the lifegrid and prepare the URL object
+	* @return {Object} - The URL object
+	*/
 	common.parseURLString = (function() {
 		var presentURLString,
 			presentURLArray,
@@ -232,8 +244,6 @@ var LifeGrid = (function() {
 				urlObject.page.push(pageObject);
 			}
 		}
-
-
 
 		return urlObject;
 	});
