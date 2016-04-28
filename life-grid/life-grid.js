@@ -332,7 +332,7 @@ var LifeGrid = (function() {
 				jQuery(pageNumberDOM).trigger('click');
 				pageNumberDOMIndex = jQuery("li a", paginationContainer).index(pageNumberDOM);
 				jQuery("li:lt("+(pageNumberDOMIndex)+")", paginationContainer).each(function() {
-					if(jQuery("a", this)[0].hasAttribute("data-page-set-index")) {console.log("hello");
+					if(jQuery("a", this)[0].hasAttribute("data-page-set-index")) {
 						jQuery("a", this).trigger('click');	
 					}
 					//gridOperations.movePageSet(this, urlObject.page[index].grid);					
