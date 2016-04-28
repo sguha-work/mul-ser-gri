@@ -319,14 +319,25 @@ var LifeGrid = (function() {
 		var urlObject,
 			index,
 			paginationContainer,
-			timer;
+			timer,
+			pageNumberDOM,
+			pageNumberDOMIndex;
 
 		urlObject = common.parseURLString();
 		if(urlObject.page.length) {
 			for(index in urlObject.page) {
 				paginationContainer = jQuery(".db-pagination-wrapper", gridContainer).eq(urlObject.page[index].grid)[0];
 				jQuery("li a[data-page-index]", paginationContainer).eq(urlObject.page[index].page).attr('data-clicked-externally', 'true');
-				jQuery("li a[data-page-index]", paginationContainer).eq(urlObject.page[index].page-1).trigger('click');
+				pageNumberDOM = jQuery("li a[data-page-index]", paginationContainer).eq(urlObject.page[index].page-1)[0];
+				jQuery(pageNumberDOM).trigger('click');
+				pageNumberDOMIndex = jQuery("li a", paginationContainer).index(pageNumberDOM);
+				jQuery("li:lt("+(pageNumberDOMIndex)+")", paginationContainer).each(function() {
+					if(jQuery("a", this)[0].hasAttribute("data-page-set-index")) {console.log("hello");
+						jQuery("a", this).trigger('click');	
+					}
+					//gridOperations.movePageSet(this, urlObject.page[index].grid);					
+					
+				});
 			}
 		}
 	})
