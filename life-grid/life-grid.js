@@ -331,9 +331,12 @@ var LifeGrid = (function() {
 				pageNumberDOM = jQuery("li a[data-page-index]", paginationContainer).eq(urlObject.page[index].page-1)[0];
 				jQuery(pageNumberDOM).trigger('click');
 				pageNumberDOMIndex = jQuery("li a", paginationContainer).index(pageNumberDOM);
-				jQuery("li a[data-page-set-index]:lt("+(pageNumberDOMIndex+1)+")", paginationContainer).each(function() {console.log("hello");
-					gridOperations.movePageSet(this, urlObject.page[index].grid);					
-					//jQuery(this).trigger('click');
+				jQuery("li:lt("+(pageNumberDOMIndex)+")", paginationContainer).each(function() {
+					if(jQuery("a", this)[0].hasAttribute("data-page-set-index")) {console.log("hello");
+						jQuery("a", this).trigger('click');	
+					}
+					//gridOperations.movePageSet(this, urlObject.page[index].grid);					
+					
 				});
 			}
 		}
