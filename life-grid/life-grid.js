@@ -36,6 +36,10 @@ var LifeGrid = (function() {
 	this.getGridStyle;// This function returns the present style object of the grid
 
 	attributes = {
+		gridFunctionality: {
+			changeURL: false
+		},
+
 		isAnimate: true,
 		style: {
 			border: "solid", // {String}, border of the table
@@ -682,13 +686,15 @@ var LifeGrid = (function() {
 			}
 
 			// changing the URL string with search
-			urlObject = common.parseURLString();
-			searchObject = {};
-			searchObject.grid = parseInt(jQuery(this).next().attr('data-grid-index'));
-			searchObject.searchText = jQuery.trim(jQuery(this).val());
+			if(attributes.gridFunctionality.changeURL) {
+				urlObject = common.parseURLString();
+				searchObject = {};
+				searchObject.grid = parseInt(jQuery(this).next().attr('data-grid-index'));
+				searchObject.searchText = jQuery.trim(jQuery(this).val());
 
-			newURLString = common.prepareURLString("search", searchObject, urlObject);
-			window.location.hash = newURLString;
+				newURLString = common.prepareURLString("search", searchObject, urlObject);
+				window.location.hash = newURLString;
+			}
 		});
 
 		// Attaching pagination event
@@ -726,15 +732,17 @@ var LifeGrid = (function() {
 			}
 
 			if(this.hasAttribute('data-page-index') && !this.hasAttribute('data-clicked-externally')) {
-				urlObject = common.parseURLString();
-				
-				pageObject = {};
-				pageObject.grid = gridIndex;
-				pageObject.page = pageNumber;
+				if(attributes.gridFunctionality.changeURL) {
+					urlObject = common.parseURLString();
+					
+					pageObject = {};
+					pageObject.grid = gridIndex;
+					pageObject.page = pageNumber;
 
-				newURLString = common.prepareURLString("page", pageObject, urlObject);
-				
-				window.location.hash = newURLString;
+					newURLString = common.prepareURLString("page", pageObject, urlObject);
+					
+					window.location.hash = newURLString;
+				}
 			}
 
 			if(this.hasAttribute('data-clicked-externally')) {
