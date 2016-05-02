@@ -180,6 +180,7 @@ var LifeGrid = (function() {
 				if(!lifeGridUrlObject.page.length) {
 					lifeGridUrlObject.page.push(value);
 				} else {
+					flag = 0;
 					for(index in lifeGridUrlObject.page) {
 						if(lifeGridUrlObject.page[index].grid == value.grid) {
 							lifeGridUrlObject.page[index].page = value.page;
@@ -191,6 +192,23 @@ var LifeGrid = (function() {
 					}
 				}
 			break; 
+
+			case "search":
+				if(!lifeGridUrlObject.search.length) {
+					lifeGridUrlObject.search.push(value);
+				} else {
+					flag = 0;
+					for(index in lifeGridUrlObject.search) {
+						if(lifeGridUrlObject.search[index].grid == value.grid) {
+							lifeGridUrlObject.search[index].searchText = value.searchText;
+							flag = 1;
+						}
+					}
+					if(!flag) {
+						lifeGridUrlObject.search.push(value);
+					}
+				}
+			break;
 		}
 		return lifeGridUrlObject;
 	});
@@ -206,6 +224,7 @@ var LifeGrid = (function() {
 
 		urlObject = common.prepareURLObjectWithOldObjectAndNewValue(type, value, previousObject);
 		urlString = "#";
+		
 		if(urlObject.page.length) {
 			urlString += "lggrid-page=";
 			for(index in urlObject.page) {
@@ -213,6 +232,18 @@ var LifeGrid = (function() {
 			}
 			urlString = urlString.slice(0, -2);
 		}
+
+		if(urlObject.search.length) {
+			if(urlString != "#") {
+				urlString += ",";
+			}
+			urlString += "lggrid-search=";
+			for(index in urlObject.search) {
+				urlString += (urlObject.search[index].grid+1)+"-"+(urlObject.search[index].searchText) + "--";
+			}
+			urlString = urlString.slice(0, -2);	
+		}
+
 		return urlString;
 	});
 
@@ -226,7 +257,8 @@ var LifeGrid = (function() {
 			presentLifeGridString,
 			urlObject,
 			index,
-			pageObject;
+			pageObject,
+			searchObject;
 
 		presentLifeGridString = "";	
 		presentURLString = window.location.hash;
@@ -245,6 +277,15 @@ var LifeGrid = (function() {
 			}
 		}
 
+		if(presentURLString.indexOf("lggrid-search=") != -1) {
+			presentURLArray = presentURLString.split("lggrid-search=")[1].split(",")[0].split("--");
+			for(index in presentURLArray) {
+				searchObject = {};
+				searchObject.grid = parseInt(presentURLArray[index].split("-")[0])-1;
+				searchObject.searchText = presentURLArray[index].split("-")[1];
+				urlObject.search.push(searchObject);
+			}
+		}
 		return urlObject;
 	});
 
@@ -331,9 +372,12 @@ var LifeGrid = (function() {
 			paginationContainer,
 			timer,
 			pageNumberDOM,
-			pageNumberDOMIndex;
+			pageNumberDOMIndex,
+			gridIndex,
+			searchText;
 
 		urlObject = common.parseURLString();
+		
 		if(urlObject.page.length) {
 			for(index in urlObject.page) {
 				paginationContainer = jQuery(".db-pagination-wrapper", gridContainer).eq(urlObject.page[index].grid)[0];
@@ -345,12 +389,18 @@ var LifeGrid = (function() {
 					if(jQuery("a", this)[0].hasAttribute("data-page-set-index")) {
 						jQuery("a", this).trigger('click');	
 					}
-					//gridOperations.movePageSet(this, urlObject.page[index].grid);					
-					
 				});
 			}
 		}
-	})
+		
+		if(urlObject.search.length) {
+			for(index in urlObject.search) {
+				gridIndex = urlObject.search[index].grid;
+				searchText = urlObject.search[index].searchText;
+				jQuery("input[data-grid-index='"+gridIndex+"']").prev().val(searchText).next().trigger('click');
+			}
+		}
+	});
 	
 	/**
 	* @description - This function make all the row opacity 1
@@ -622,11 +672,23 @@ var LifeGrid = (function() {
 		});
 		
 		jQuery("input[value='Search']", gridContainer).prev().on('change keyup paste', function() {
+			var urlObject,
+				searchObject,
+				newURLString;
 			if(jQuery(this).prev().prev().is(":checked")) {
 				gridOperations.searchGrid(jQuery.trim(jQuery(this).val()), parseInt(jQuery(this).next().attr('data-grid-index')), 1);
 			} else {
 				gridOperations.searchGrid(jQuery.trim(jQuery(this).val()), parseInt(jQuery(this).next().attr('data-grid-index')), 0);	
 			}
+
+			// changing the URL string with search
+			urlObject = common.parseURLString();
+			searchObject = {};
+			searchObject.grid = parseInt(jQuery(this).next().attr('data-grid-index'));
+			searchObject.searchText = jQuery.trim(jQuery(this).val());
+
+			newURLString = common.prepareURLString("search", searchObject, urlObject);
+			window.location.hash = newURLString;
 		});
 
 		// Attaching pagination event
