@@ -547,7 +547,14 @@ var LifeGrid = (function() {
 	});
 
 	gridOperations.sortByColoumn = (function(gridIndex) {
+		var rowIndex,
+			rowLength;
+		rowLength = jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).length;	
+		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
+			
+		}
 		console.log(JSON.stringify(sortObject));
+
 	});
 
 	/**
