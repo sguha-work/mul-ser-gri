@@ -546,12 +546,29 @@ var LifeGrid = (function() {
 
 	});
 
+	/**
+	* @description - This function sort the data table
+	* @params gridIndex {Number} - 0 based index of the data table
+	*/
 	gridOperations.sortByColoumn = (function(gridIndex) {
 		var rowIndex,
-			rowLength;
+			rowLength,
+			rowIndex2,
+			data1,
+			data2,
+			dataCompareResult;
 		rowLength = jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).length;	
 		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
-			
+			for(rowIndex2=rowIndex+1; rowIndex2<rowLength; rowIndex2++) {
+				data1 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex)).eq(sortObject.sortBy[gridIndex]).text();
+				data2 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex2)).eq(sortObject.sortBy[gridIndex]).text();
+				dataCompareResult = common.compareData(data1, data2);
+				if(sortObject.direction[gridIndex] == "asc") {
+
+				} else {
+
+				}
+			}
 		}
 		console.log(JSON.stringify(sortObject));
 
