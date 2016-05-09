@@ -189,10 +189,38 @@ var LifeGrid = (function() {
 	* @return {Number} - if (data1>data2) return 1, if (data1==data2) return 0, if (data1<data2) return -1
 	*/
 	common.compareData = (function(data1, data2) {
-		var result;
-		if(isNaN(data1)) {
-
-		} else {
+		var result,
+			index;
+		if(isNaN(data1)) { // string checking
+			data1 = data1.toLowerCase();
+			data2 = data2.toLowerCase();
+			result = null;
+			for(index=0; index<data1.length; index++) {
+				if(typeof data1[index]!="undefined" && typeof data2[index]=="undefined") {
+					result = -1;
+					break;
+				}
+				if(typeof data1[index]=="undefined" && typeof data2[index]!="undefined") {
+					result = 1;
+					break;
+				}
+				if(data1[index] == data2[index]) {
+					continue;
+				}
+				if(data1[index] > data2[index]) {
+					result = 1;
+					break;
+				}
+				if(data1[index] < data2[index]) {
+					result = -1;
+					break;
+				}
+			}
+			if(result == null) {
+				result = 0;
+			}
+			return result;
+		} else { // number checking
 			result = data1 - data2;
 			if(result > 0) {
 				return 1;
