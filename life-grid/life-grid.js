@@ -156,8 +156,7 @@ var LifeGrid = (function() {
 	* This object will define the present sorted contion of grid
 	* {
 	*	direction: ["asc", "desc"],
-	*   sortBy: ["Contact Title", "Contact Company"],
-	*   gridIndex: [0, 1] 
+	*   sortBy: [1, 0],
 	* }
 	*/
 	sortObject = {
@@ -497,7 +496,7 @@ var LifeGrid = (function() {
 
 	});
 
-	gridOperations.sortByColoumn = (function(gridIndex, coloumnDOM) {
+	gridOperations.sortByColoumn = (function(gridIndex) {
 		console.log(JSON.stringify(sortObject));
 	});
 
@@ -892,8 +891,8 @@ var LifeGrid = (function() {
 			} else {
 				sortObject.direction[gridIndex] = "asc";
 			}
-			sortObject.sortBy[gridIndex] = jQuery(this).text();
-			gridOperations.sortByColoumn(gridIndex, this);
+			sortObject.sortBy[gridIndex] = jQuery("td", jQuery("table[role='table-header'] tr", gridContainer).eq(gridIndex)[0]).index(jQuery(this));
+			gridOperations.sortByColoumn(gridIndex);
 			
 		});
 
@@ -1009,7 +1008,7 @@ var LifeGrid = (function() {
 		// initializing the global sort object	
 		for(index=0; index<dataForGrid.length; index++) {
 			sortObject.direction[index] = "none";
-			sortObject.sortBy[index] = "none";
+			sortObject.sortBy[index] = null;
 		}
 
 		startAttachingInitialAttributes();	
