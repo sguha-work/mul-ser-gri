@@ -27,7 +27,8 @@ var LifeGrid = (function() {
 		setDataToCell,
 		dataToDOM,// {Object} holds the methods to convert data to DOM
 		attributeMethods, // {Object holds the methods to set or get attribute}
-		startAttachingOtherAttributes;
+		startAttachingOtherAttributes,
+		sortObject;
 
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
@@ -149,6 +150,19 @@ var LifeGrid = (function() {
 		getCaptionStyle: function() {
 			return attribute.caption;
 		}
+	};
+
+	/**
+	* This object will define the present sorted contion of grid
+	* {
+	*	direction: ["asc", "desc"],
+	*   sortBy: ["Contact Title", "Contact Company"],
+	*   gridIndex: [0, 1] 
+	* }
+	*/
+	sortObject = {
+		direction: [],
+		sortBy: []
 	};
 
 	/**
@@ -483,6 +497,10 @@ var LifeGrid = (function() {
 
 	});
 
+	gridOperations.sortByColoumn = (function(gridIndex, coloumnDOM) {
+		console.log(JSON.stringify(sortObject));
+	});
+
 	/**
 	* @description - This function controls the page set display
 	* @param pageSetDOM {Object} - The DOM object
@@ -557,7 +575,7 @@ var LifeGrid = (function() {
 			headerHTML;
 		headerHTML = '<div class="db-table-header"><table role="table-header"><tbody><colgroup><col style="width:20%"><col style="width:30%"><col style="width:30%"><col style="width:20%"></colgroup><tr>';
 		for(var index in headers) {
-			headerHTML += '<td><a class="header" href="javascript:void(0)">' + headers[index] + ' <span class="db-icon db-icon-up"></span></a></td>';
+			headerHTML += '<td><a class="header" href="javascript:void(0)">' + headers[index] + ' <!--<span class="db-icon db-icon-up"></span>--></a></td>';
 		}
 		
 		headerHTML += "</tr></tbody></table></div>";
@@ -634,7 +652,7 @@ var LifeGrid = (function() {
 		}
 		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="javascript:void(0)">......</a></li>';
 		
-		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="javascript:void(0)" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="javascript:void(0)" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="javascript:void(0)" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="javascript:void(0)" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label></label> - <label></label> of ' + totalNumberOfData + ' items</span><a href="javascript:void(0)" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
+		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="javascript:void(0)" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="javascript:void(0)" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="javascript:void(0)" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="javascript:void(0)" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><!--<input type="checkbox"><label> Search entire data </label>--><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label></label> - <label></label> of ' + totalNumberOfData + ' items</span><a href="javascript:void(0)" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
 		return footerHTML;
 	});
 
@@ -862,6 +880,23 @@ var LifeGrid = (function() {
 			jQuery("li a[data-page-index]", presentPaginationDOM).first().trigger('click');			
 		});
 
+		// binding sort event
+		jQuery("table[role='table-header'] tr td", gridContainer).on('click', function() {
+			var gridIndex,
+				presentHeaderTableDOM,
+				sortDirection;
+			presentHeaderTableDOM = jQuery(this).parent().parent().parent();
+			gridIndex = jQuery("table[role='table-header']", gridContainer).index(presentHeaderTableDOM);
+			if(sortObject.direction[gridIndex] === "asc") {
+				sortObject.direction[gridIndex] = "desc";
+			} else {
+				sortObject.direction[gridIndex] = "asc";
+			}
+			sortObject.sortBy[gridIndex] = jQuery(this).text();
+			gridOperations.sortByColoumn(gridIndex, this);
+			
+		});
+
 	});
 
 	/**
@@ -968,7 +1003,14 @@ var LifeGrid = (function() {
 		var gridHTML,
 			dataKeys,
 			dataKeyIndex,
-			dataGridIndex;
+			dataGridIndex,
+			index;
+
+		// initializing the global sort object	
+		for(index=0; index<dataForGrid.length; index++) {
+			sortObject.direction[index] = "none";
+			sortObject.sortBy[index] = "none";
+		}
 
 		startAttachingInitialAttributes();	
 		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
