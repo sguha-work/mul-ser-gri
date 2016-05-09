@@ -183,6 +183,28 @@ var LifeGrid = (function() {
 	common = {};
 	
 	/**
+	* @description - This function compare two data (string or number). If the data is string then lexically it will be checked
+	* @params data1 {String} - The first data
+	* @params data2 {String} - The second data	
+	* @return {Number} - if (data1>data2) return 1, if (data1==data2) return 0, if (data1<data2) return -1
+	*/
+	common.compareData = (function(data1, data2) {
+		var result;
+		if(isNaN(data1)) {
+
+		} else {
+			result = data1 - data2;
+			if(result > 0) {
+				return 1;
+			}else if(result < 0) {
+				return -1;
+			} else {
+				return 0
+			}
+		}
+	});
+
+	/**
 	* @description - Prepare new URL object with old URL object and new type values
 	* @return {Object} - The new URL object
 	*/
