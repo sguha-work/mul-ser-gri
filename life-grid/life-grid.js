@@ -556,21 +556,38 @@ var LifeGrid = (function() {
 			rowIndex2,
 			data1,
 			data2,
-			dataCompareResult;
+			dataCompareResult,
+			rowNumberArray,
+			tempData;
 		rowLength = jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).length;	
+		
+		rowNumberArray = [];
+		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
+			rowNumberArray.push(rowIndex);
+		}
+
 		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
 			for(rowIndex2=rowIndex+1; rowIndex2<rowLength; rowIndex2++) {
 				data1 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex)).eq(sortObject.sortBy[gridIndex]).text();
 				data2 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex2)).eq(sortObject.sortBy[gridIndex]).text();
+				console.log("data1 "+data1+" data2 "+data2);
 				dataCompareResult = common.compareData(data1, data2);
 				if(sortObject.direction[gridIndex] == "asc") {
-
+					if(dataCompareResult>0) {
+						tempData = rowNumberArray[rowIndex];
+						rowNumberArray[rowIndex] = rowNumberArray[rowIndex2];
+						rowNumberArray[rowIndex2] = tempData;
+					}
 				} else {
-
+					if(dataCompareResult<0) {
+						tempData = rowNumberArray[rowIndex];
+						rowNumberArray[rowIndex] = rowNumberArray[rowIndex2];
+						rowNumberArray[rowIndex2] = tempData;
+					}
 				}
 			}
 		}
-		console.log(JSON.stringify(sortObject));
+		
 
 	});
 
