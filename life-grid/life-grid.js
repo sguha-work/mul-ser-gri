@@ -592,6 +592,7 @@ var LifeGrid = (function() {
 		}
 		console.log("end "+JSON.stringify(rowNumberArray));
 		finalResultHTML = "";
+		
 		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
 			finalResultHTML += "<tr>" + jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowNumberArray[rowIndex]).html() + "</tr>";
 		}
