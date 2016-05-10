@@ -559,7 +559,8 @@ var LifeGrid = (function() {
 			dataCompareResult,
 			rowNumberArray,
 			tempData,
-			swapCounter;
+			swapCounter,
+			finalResultHTML;
 		rowLength = jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).length;	
 		
 		rowNumberArray = [];
@@ -569,8 +570,8 @@ var LifeGrid = (function() {
 
 		console.log("begin "+JSON.stringify(rowNumberArray) + " sort direction " + sortObject.direction[gridIndex]);
 		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
-			for(rowIndex2=0; rowIndex2<rowLength; rowIndex2++) {
-				data1 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex)).eq(sortObject.sortBy[gridIndex]).text();
+			data1 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex)).eq(sortObject.sortBy[gridIndex]).text();
+			for(rowIndex2=rowIndex+1; rowIndex2<rowLength; rowIndex2++) {
 				data2 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex2)).eq(sortObject.sortBy[gridIndex]).text();
 				dataCompareResult = common.compareData(data1, data2);
 				console.log("data1 "+ data1 + " data2 " + data2 + " dataCompareResult " + dataCompareResult);
@@ -590,13 +591,11 @@ var LifeGrid = (function() {
 			}
 		}
 		console.log("end "+JSON.stringify(rowNumberArray));
-		swapCounter = rowLength/2;
-		for(rowIndex=0; rowIndex<swapCounter; rowIndex++) {
-			tempData = jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex).html();
-			jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex).html(jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowNumberArray[rowIndex]).html());
-			jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowNumberArray[rowIndex]).html(tempData);
+		finalResultHTML = "";
+		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
+			finalResultHTML += "<tr>" + jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowNumberArray[rowIndex]).html() + "</tr>";
 		}
-
+		jQuery("table[data-grid-index='"+gridIndex+"']",gridContainer).html(finalResultHTML);
 	});
 
 	/**
