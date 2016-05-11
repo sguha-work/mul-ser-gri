@@ -192,8 +192,8 @@ var LifeGrid = (function() {
 		var result,
 			index;
 		if(isNaN(data1)) { // string checking
-			data1 = data1.toLowerCase();
-			data2 = data2.toLowerCase();
+			data1 = jQuery.trim(data1.toLowerCase());
+			data2 = jQuery.trim(data2.toLowerCase());
 			result = null;
 			for(index=0; index<data1.length; index++) {
 				if(typeof data1[index]!="undefined" && typeof data2[index]=="undefined") {
@@ -561,7 +561,7 @@ var LifeGrid = (function() {
 			tempData,
 			swapCounter,
 			finalResultHTMLArray;
-		rowLength = jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).length;	
+		rowLength = attributes.pagination.dataPerPage;	
 		
 		rowNumberArray = [];
 		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
@@ -570,22 +570,23 @@ var LifeGrid = (function() {
 
 		console.log("begin "+JSON.stringify(rowNumberArray) + " sort direction " + sortObject.direction[gridIndex]);
 		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
-			data1 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex)).eq(sortObject.sortBy[gridIndex]).text();
-			for(rowIndex2=rowIndex+1; rowIndex2<rowLength; rowIndex2++) {
-				data2 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex2)).eq(sortObject.sortBy[gridIndex]).text();
+			
+			for(rowIndex2=0; rowIndex2<(rowLength-rowIndex-1); rowIndex2++) {
+				data1 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex2)).eq(sortObject.sortBy[gridIndex]).text();
+				data2 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex2+1)).eq(sortObject.sortBy[gridIndex]).text();
 				dataCompareResult = common.compareData(data1, data2);
 				console.log("data1 "+ data1 + " data2 " + data2 + " dataCompareResult " + dataCompareResult);
 				if(sortObject.direction[gridIndex] == "asc") {
-					if(dataCompareResult>0) {
-						tempData = rowNumberArray[rowIndex];
-						rowNumberArray[rowIndex] = rowNumberArray[rowIndex2];
-						rowNumberArray[rowIndex2] = tempData;
+					if(dataCompareResult>0) {console.log("swap");
+						tempData = rowNumberArray[rowIndex2];
+						rowNumberArray[rowIndex2] = rowNumberArray[rowIndex2+1];
+						rowNumberArray[rowIndex2+1] = tempData;console.log(JSON.stringify(rowNumberArray));
 					}
 				} else {
 					if(dataCompareResult<0) {
-						tempData = rowNumberArray[rowIndex];
-						rowNumberArray[rowIndex] = rowNumberArray[rowIndex2];
-						rowNumberArray[rowIndex2] = tempData;
+						tempData = rowNumberArray[rowIndex2];
+						rowNumberArray[rowIndex2] = rowNumberArray[rowIndex2+1];
+						rowNumberArray[rowIndex2+1] = tempData;
 					}
 				}
 			}
