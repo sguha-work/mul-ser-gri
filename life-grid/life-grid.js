@@ -27,7 +27,8 @@ var LifeGrid = (function() {
 		setDataToCell,
 		dataToDOM,// {Object} holds the methods to convert data to DOM
 		attributeMethods, // {Object holds the methods to set or get attribute}
-		startAttachingOtherAttributes;
+		startAttachingOtherAttributes,
+		sortObject;
 
 	// public properties
 	this.initialize; // This function is the constructor of LifeGrid
@@ -36,6 +37,10 @@ var LifeGrid = (function() {
 	this.getGridStyle;// This function returns the present style object of the grid
 
 	attributes = {
+		gridFunctionality: {
+			changeURL: false
+		},
+
 		isAnimate: true,
 		style: {
 			border: "solid", // {String}, border of the table
@@ -148,6 +153,18 @@ var LifeGrid = (function() {
 	};
 
 	/**
+	* This object will define the present sorted contion of grid
+	* {
+	*	direction: ["asc", "desc"],
+	*   sortBy: [1, 0],
+	* }
+	*/
+	sortObject = {
+		direction: [],
+		sortBy: []
+	};
+
+	/**
 	* @description - This method add resource files to the page
 	*/
 	addResourceToPage = (function() {
@@ -165,6 +182,56 @@ var LifeGrid = (function() {
 	// common is the core object holding basic operations used throughout the program
 	common = {};
 	
+	/**
+	* @description - This function compare two data (string or number). If the data is string then lexically it will be checked
+	* @params data1 {String} - The first data
+	* @params data2 {String} - The second data	
+	* @return {Number} - if (data1>data2) return 1, if (data1==data2) return 0, if (data1<data2) return -1
+	*/
+	common.compareData = (function(data1, data2) {
+		var result,
+			index;
+		if(isNaN(data1)) { // string checking
+			data1 = jQuery.trim(data1.toLowerCase());
+			data2 = jQuery.trim(data2.toLowerCase());
+			result = null;
+			for(index=0; index<data1.length; index++) {
+				if(typeof data1[index]!="undefined" && typeof data2[index]=="undefined") {
+					result = -1;
+					break;
+				}
+				if(typeof data1[index]=="undefined" && typeof data2[index]!="undefined") {
+					result = 1;
+					break;
+				}
+				if(data1[index] == data2[index]) {
+					continue;
+				}
+				if(data1[index] > data2[index]) {
+					result = 1;
+					break;
+				}
+				if(data1[index] < data2[index]) {
+					result = -1;
+					break;
+				}
+			}
+			if(result == null) {
+				result = 0;
+			}
+			return result;
+		} else { // number checking
+			result = data1 - data2;
+			if(result > 0) {
+				return 1;
+			}else if(result < 0) {
+				return -1;
+			} else {
+				return 0
+			}
+		}
+	});
+
 	/**
 	* @description - Prepare new URL object with old URL object and new type values
 	* @return {Object} - The new URL object
@@ -480,6 +547,62 @@ var LifeGrid = (function() {
 	});
 
 	/**
+	* @description - This function sort the data table
+	* @params gridIndex {Number} - 0 based index of the data table
+	*/
+	gridOperations.sortByColoumn = (function(gridIndex) {
+		var rowIndex,
+			rowLength,
+			rowIndex2,
+			data1,
+			data2,
+			dataCompareResult,
+			rowNumberArray,
+			tempData,
+			swapCounter,
+			finalResultHTMLArray;
+		rowLength = attributes.pagination.dataPerPage;	
+		
+		rowNumberArray = [];
+		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
+			rowNumberArray.push(rowIndex);
+		}
+
+		console.log("begin "+JSON.stringify(rowNumberArray) + " sort direction " + sortObject.direction[gridIndex]);
+		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
+			
+			for(rowIndex2=0; rowIndex2<(rowLength-rowIndex-1); rowIndex2++) {
+				data1 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex2)).eq(sortObject.sortBy[gridIndex]).text();
+				data2 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex2+1)).eq(sortObject.sortBy[gridIndex]).text();
+				dataCompareResult = common.compareData(data1, data2);
+				console.log("data1 "+ data1 + " data2 " + data2 + " dataCompareResult " + dataCompareResult);
+				if(sortObject.direction[gridIndex] == "asc") {
+					if(dataCompareResult>0) {console.log("swap");
+						tempData = rowNumberArray[rowIndex2];
+						rowNumberArray[rowIndex2] = rowNumberArray[rowIndex2+1];
+						rowNumberArray[rowIndex2+1] = tempData;console.log(JSON.stringify(rowNumberArray));
+					}
+				} else {
+					if(dataCompareResult<0) {
+						tempData = rowNumberArray[rowIndex2];
+						rowNumberArray[rowIndex2] = rowNumberArray[rowIndex2+1];
+						rowNumberArray[rowIndex2+1] = tempData;
+					}
+				}
+			}
+		}
+		console.log("end "+JSON.stringify(rowNumberArray));
+		finalResultHTMLArray = [];
+
+		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
+			finalResultHTMLArray.push(jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowNumberArray[rowIndex]).clone(true));
+		}
+		jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).each(function(index) {
+			jQuery(this).replaceWith(finalResultHTMLArray[index]);
+		});
+	});
+
+	/**
 	* @description - This function controls the page set display
 	* @param pageSetDOM {Object} - The DOM object
 	* @param gridIndex {Number} - 0 based index of the grid
@@ -553,7 +676,7 @@ var LifeGrid = (function() {
 			headerHTML;
 		headerHTML = '<div class="db-table-header"><table role="table-header"><tbody><colgroup><col style="width:20%"><col style="width:30%"><col style="width:30%"><col style="width:20%"></colgroup><tr>';
 		for(var index in headers) {
-			headerHTML += '<td><a class="header" href="javascript:void(0)">' + headers[index] + ' <span class="db-icon db-icon-up"></span></a></td>';
+			headerHTML += '<td><a class="header" href="javascript:void(0)">' + headers[index] + ' <!--<span class="db-icon db-icon-up"></span>--></a></td>';
 		}
 		
 		headerHTML += "</tr></tbody></table></div>";
@@ -630,7 +753,7 @@ var LifeGrid = (function() {
 		}
 		pageNumberHTML += '<li data-move-set-direction="r" style="display:none"><a data-page-set-index="'+pageSetIndex+'" class="page-link"  title="More pages" href="javascript:void(0)">......</a></li>';
 		
-		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="javascript:void(0)" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="javascript:void(0)" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="javascript:void(0)" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="javascript:void(0)" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><input type="checkbox"><label> Search entire data </label><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label></label> - <label></label> of ' + totalNumberOfData + ' items</span><a href="javascript:void(0)" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
+		footerHTML = '<div class="db-table-footer"><div class="db-pagination-wrapper"><a href="javascript:void(0)" title="Go to the first page" class="page-link page-link-first"><span class="db-icon db-icon-left-arrow-first">Go to the first page</span></a><a href="javascript:void(0)" title="Go to the previous page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-previous">Go to the previous page</span></a><ul class="db-pagination">' + pageNumberHTML + '</ul><a href="javascript:void(0)" title="Go to the next page" class="page-link page-link-nav" ><span class="db-icon db-icon-left-arrow-next">Go to the next page</span></a><a href="javascript:void(0)" title="Go to the last page" class="page-link page-link-last" ><span class="db-icon db-icon-right-arrow-last">Go to the last page</span></a></div><div class="db-search-wrapper"><!--<input type="checkbox"><label> Search entire data </label>--><input type="text" class="search"><input data-grid-index="' + gridIndex + '" type="submit" value="Search" class="button"></div><div class="db-page-info-wrapper"><span class="db-page-info"><label></label> - <label></label> of ' + totalNumberOfData + ' items</span><a href="javascript:void(0)" class="page-link"><span class="db-icon db-icon-reload"></span></a></div></div></div>';
 		return footerHTML;
 	});
 
@@ -682,13 +805,15 @@ var LifeGrid = (function() {
 			}
 
 			// changing the URL string with search
-			urlObject = common.parseURLString();
-			searchObject = {};
-			searchObject.grid = parseInt(jQuery(this).next().attr('data-grid-index'));
-			searchObject.searchText = jQuery.trim(jQuery(this).val());
+			if(attributes.gridFunctionality.changeURL) {
+				urlObject = common.parseURLString();
+				searchObject = {};
+				searchObject.grid = parseInt(jQuery(this).next().attr('data-grid-index'));
+				searchObject.searchText = jQuery.trim(jQuery(this).val());
 
-			newURLString = common.prepareURLString("search", searchObject, urlObject);
-			window.location.hash = newURLString;
+				newURLString = common.prepareURLString("search", searchObject, urlObject);
+				window.location.hash = newURLString;
+			}
 		});
 
 		// Attaching pagination event
@@ -726,15 +851,17 @@ var LifeGrid = (function() {
 			}
 
 			if(this.hasAttribute('data-page-index') && !this.hasAttribute('data-clicked-externally')) {
-				urlObject = common.parseURLString();
-				
-				pageObject = {};
-				pageObject.grid = gridIndex;
-				pageObject.page = pageNumber;
+				if(attributes.gridFunctionality.changeURL) {
+					urlObject = common.parseURLString();
+					
+					pageObject = {};
+					pageObject.grid = gridIndex;
+					pageObject.page = pageNumber;
 
-				newURLString = common.prepareURLString("page", pageObject, urlObject);
-				
-				window.location.hash = newURLString;
+					newURLString = common.prepareURLString("page", pageObject, urlObject);
+					
+					window.location.hash = newURLString;
+				}
 			}
 
 			if(this.hasAttribute('data-clicked-externally')) {
@@ -854,6 +981,23 @@ var LifeGrid = (function() {
 			jQuery("li a[data-page-index]", presentPaginationDOM).first().trigger('click');			
 		});
 
+		// binding sort event
+		jQuery("table[role='table-header'] tr td", gridContainer).on('click', function() {
+			var gridIndex,
+				presentHeaderTableDOM,
+				sortDirection;
+			presentHeaderTableDOM = jQuery(this).parent().parent().parent();
+			gridIndex = jQuery("table[role='table-header']", gridContainer).index(presentHeaderTableDOM);
+			if(sortObject.direction[gridIndex] === "asc") {
+				sortObject.direction[gridIndex] = "desc";
+			} else {
+				sortObject.direction[gridIndex] = "asc";
+			}
+			sortObject.sortBy[gridIndex] = jQuery("td", jQuery("table[role='table-header'] tr", gridContainer).eq(gridIndex)[0]).index(jQuery(this));
+			gridOperations.sortByColoumn(gridIndex);
+			
+		});
+
 	});
 
 	/**
@@ -960,7 +1104,14 @@ var LifeGrid = (function() {
 		var gridHTML,
 			dataKeys,
 			dataKeyIndex,
-			dataGridIndex;
+			dataGridIndex,
+			index;
+
+		// initializing the global sort object	
+		for(index=0; index<dataForGrid.length; index++) {
+			sortObject.direction[index] = "none";
+			sortObject.sortBy[index] = null;
+		}
 
 		startAttachingInitialAttributes();	
 		if(Array.isArray(dataForGrid) && dataForGrid.length == 1) {// For single seriese
