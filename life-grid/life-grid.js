@@ -560,7 +560,7 @@ var LifeGrid = (function() {
 			rowNumberArray,
 			tempData,
 			swapCounter,
-			finalResultHTML;
+			finalResultHTMLArray;
 		rowLength = jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).length;	
 		
 		rowNumberArray = [];
@@ -591,12 +591,14 @@ var LifeGrid = (function() {
 			}
 		}
 		console.log("end "+JSON.stringify(rowNumberArray));
-		finalResultHTML = "";
-		
+		finalResultHTMLArray = [];
+
 		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
-			finalResultHTML += "<tr>" + jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowNumberArray[rowIndex]).html() + "</tr>";
+			finalResultHTMLArray.push(jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowNumberArray[rowIndex]).clone(true));
 		}
-		jQuery("table[data-grid-index='"+gridIndex+"']",gridContainer).html(finalResultHTML);
+		jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).each(function(index) {
+			jQuery(this).replaceWith(finalResultHTMLArray[index]);
+		});
 	});
 
 	/**
