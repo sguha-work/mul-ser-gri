@@ -572,8 +572,8 @@ var LifeGrid = (function() {
 		for(rowIndex=0; rowIndex<rowLength; rowIndex++) {
 			
 			for(rowIndex2=0; rowIndex2<(rowLength-rowIndex-1); rowIndex2++) {
-				data1 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex2)).eq(sortObject.sortBy[gridIndex]).text();
-				data2 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowIndex2+1)).eq(sortObject.sortBy[gridIndex]).text();
+				data1 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowNumberArray[rowIndex2])).eq(sortObject.sortBy[gridIndex]).text();
+				data2 = jQuery("td",jQuery("table[data-grid-index='"+gridIndex+"'] tr",gridContainer).eq(rowNumberArray[rowIndex2+1])).eq(sortObject.sortBy[gridIndex]).text();
 				dataCompareResult = common.compareData(data1, data2);
 				console.log("data1 "+ data1 + " data2 " + data2 + " dataCompareResult " + dataCompareResult);
 				if(sortObject.direction[gridIndex] == "asc") {
